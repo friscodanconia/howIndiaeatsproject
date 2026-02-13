@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useResponsiveSvg } from '../hooks/useResponsiveSvg';
 import { weeklyPatterns, dishMap } from '../../../data/searchingForFood';
@@ -229,6 +229,13 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
 
   }, [activeStep, dimensions]);
 
+  const legendDishes = useMemo(() => {
+    return weeklyPatterns.map(wp => {
+      const dish = dishMap.get(wp.dishId);
+      return dish ? { id: wp.dishId, name: dish.name, color: dish.color } : null;
+    }).filter(Boolean) as { id: string; name: string; color: string }[];
+  }, []);
+
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
       <svg
@@ -237,6 +244,31 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
         height={dimensions.height}
         style={{ overflow: 'visible' }}
       />
+
+      {/* Color legend */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: '0.5rem 1rem',
+        padding: '0.5rem 0',
+        fontFamily: '"Jost", sans-serif',
+        fontSize: '0.75rem',
+      }}>
+        {legendDishes.map(d => (
+          <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <span style={{
+              width: 10,
+              height: 10,
+              borderRadius: 2,
+              background: d.color,
+              flexShrink: 0,
+            }} />
+            <span style={{ color: '#68594f' }}>{d.name}</span>
+          </div>
+        ))}
+      </div>
+
       {tooltip.visible && (
         <div
           className="viz-tooltip"
