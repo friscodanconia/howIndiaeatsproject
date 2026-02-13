@@ -46,8 +46,10 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
       ...sorted.map(d => d.consumptionRank)
     );
 
-    const xLeft = d3.scaleLinear().domain([0, maxRank]).range([midX - 20, 0]);
-    const xRight = d3.scaleLinear().domain([0, maxRank]).range([midX + 20, w]);
+    // Bar length = intensity (rank #1 = longest bar, higher rank = shorter bar)
+    // barWidth maps a rank to its pixel width (inverted: lower rank number = wider)
+    const halfWidth = midX - 20;
+    const barWidth = (rank: number) => halfWidth * (maxRank + 1 - rank) / maxRank;
 
     // Column headers
     g.append('text')
@@ -111,10 +113,11 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
         .attr('fill', '#28211e')
         .text(dish?.name || item.dishId);
 
-      // Search bar (left)
+      // Search bar (left) — grows leftward from center
       if (showSearch) {
+        const sw = barWidth(item.searchRank);
         rowGroup.append('rect')
-          .attr('x', xLeft(item.searchRank))
+          .attr('x', midX - 20 - sw)
           .attr('y', yPos + 2)
           .attr('width', 0)
           .attr('height', barHeight - 4)
@@ -123,11 +126,11 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           .attr('rx', 2)
           .attr('class', 'search-bar')
           .transition().duration(600).delay(i * 30)
-          .attr('width', midX - 20 - xLeft(item.searchRank));
+          .attr('width', sw);
 
         // Rank number
         rowGroup.append('text')
-          .attr('x', xLeft(item.searchRank) - 5)
+          .attr('x', midX - 20 - sw - 5)
           .attr('y', yPos + barHeight / 2)
           .attr('text-anchor', 'end')
           .attr('dominant-baseline', 'middle')
@@ -139,8 +142,9 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           .attr('opacity', 1);
       }
 
-      // Consumption bar (right)
+      // Consumption bar (right) — grows rightward from center
       if (showConsumption) {
+        const cw = barWidth(item.consumptionRank);
         rowGroup.append('rect')
           .attr('x', midX + 20)
           .attr('y', yPos + 2)
@@ -151,10 +155,10 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           .attr('rx', 2)
           .attr('class', 'consumption-bar')
           .transition().duration(600).delay(i * 30 + 200)
-          .attr('width', xRight(item.consumptionRank) - (midX + 20));
+          .attr('width', cw);
 
         rowGroup.append('text')
-          .attr('x', xRight(item.consumptionRank) + 5)
+          .attr('x', midX + 20 + cw + 5)
           .attr('y', yPos + barHeight / 2)
           .attr('text-anchor', 'start')
           .attr('dominant-baseline', 'middle')
