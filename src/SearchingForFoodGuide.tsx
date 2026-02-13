@@ -377,9 +377,10 @@ export function SearchingForFoodGuide() {
 
         <div className="content-col" style={{ marginBottom: '2rem' }}>
           <p>
-            There is a fascinating disconnect between what India searches for and what India
-            actually eats. The most consumed foods in the country barely register on Google,
-            while restaurant dishes and aspirational recipes dominate search.
+            You&rsquo;ve seen biryani dominate every chart so far &mdash; #1 nationally, #1 in every state.
+            But here&rsquo;s the twist: search popularity and actual consumption are very different things.
+            Biryani tops Swiggy with 93 million orders a year, yet that&rsquo;s still less than 0.02% of India&rsquo;s
+            daily meals. The foods Indians actually eat every day barely register on Google.
           </p>
         </div>
 
@@ -390,7 +391,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>What we search for</h3>
-                  <p>The left bars show Google search ranking. Biryani, Roti, and Dosa lead — a mix of aspiration and daily need. Roti at #2 is the great surprise: the most basic food is also the most searched after biryani.</p>
+                  <p>The left bars show Google search ranking &mdash; the same data that crowned biryani king in every previous chapter. Biryani leads because it&rsquo;s complex to cook: 20+ ingredients, layered rice, slow-cooked meat. People <em>need</em> Google for it. Nobody Googles how to boil dal.</p>
                 </div>
               ),
             },
@@ -398,7 +399,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>What we actually eat</h3>
-                  <p>The right bars show estimated daily consumption ranking. Dal Rice, Roti, and Khichdi — the invisible backbone of Indian cuisine — top the list. Nobody Googles what they eat every single day.</p>
+                  <p>Now look right. Roti and Masala Chai top daily consumption &mdash; 3 billion rotis and 800 million cups of chai, every single day. Dal Rice is #2. Biryani? It drops to #12 &mdash; a weekend project for most families, not a Tuesday dinner. The invisible backbone of Indian cuisine has never trended on Google.</p>
                 </div>
               ),
             },
@@ -406,7 +407,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>The gap</h3>
-                  <p>The highlighted rows show the biggest disconnects. Masala Chai is consumed billions of times daily but barely searched. Butter Chicken is everyone's search fantasy but rarely cooked at home. Search reveals aspiration; consumption reveals habit.</p>
+                  <p>The highlighted rows reveal the biggest disconnects. Momos are #5 in search but #20 in consumption &mdash; pure curiosity. Masala Chai is the opposite: consumed more than any food in India but ranked #28 in search. Search measures what we aspire to cook; consumption measures what we actually live on.</p>
                 </div>
               ),
             },
@@ -526,12 +527,17 @@ export function SearchingForFoodGuide() {
         <div className="food-footer-methodology">
           <h3>Methodology</h3>
           <p>
-            Search data pulled from Google Trends via pytrends (India, 5-year average, accessed
-            February 2026). Each dish compared head-to-head with biryani as the anchor term.
-            State-level data uses interest_by_region with the same methodology. Consumption
-            rankings estimated from NSSO 68th round household expenditure surveys and ICMR-NIN
-            dietary guidelines. Pandemic comparison uses 2019 vs 2021 data within a single
-            2018–2022 query for consistent normalization.
+            Search data from Google Trends via pytrends (India, 5-year average, accessed February
+            2026). Each dish compared head-to-head with biryani as the anchor term. State-level
+            data uses interest_by_region with the same methodology. Consumption rankings
+            triangulated from NSSO/HCES household expenditure surveys (2022-23) for cereal and
+            pulse consumption, Tea Board of India consumption survey for chai penetration,
+            Swiggy and Zomato annual reports (2024-25) for dish-level delivery data, and ICMR-NIN
+            dietary guidelines. No single source ranks all prepared dishes — consumption rankings
+            represent editorial estimates informed by these sources. High-confidence rankings
+            (roti, chai, dal-rice) are directly supported; mid-table rankings involve greater
+            uncertainty. Pandemic comparison uses 2019 vs 2021 data within a single 2018–2022
+            query for consistent normalization.
           </p>
         </div>
 
