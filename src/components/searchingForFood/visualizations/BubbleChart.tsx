@@ -145,6 +145,12 @@ export function BubbleChart({ activeStep }: BubbleChartProps) {
       .attr('opacity', 0)
       .style('cursor', 'pointer');
 
+    // Invisible hit area for touch targets (min 44px diameter)
+    enter.append('circle')
+      .attr('class', 'bubble-hit')
+      .attr('r', d => Math.max(22, d.r))
+      .attr('fill', 'transparent');
+
     // Background circle (fallback color + border)
     enter.append('circle')
       .attr('class', 'bubble-bg')
@@ -179,6 +185,8 @@ export function BubbleChart({ activeStep }: BubbleChartProps) {
       .attr('opacity', 1);
 
     // Update radii — important for existing bubbles that change size between steps
+    merged.select('circle.bubble-hit')
+      .attr('r', d => Math.max(22, d.r));
     merged.select('circle.bubble-bg')
       .attr('r', d => d.r);
 

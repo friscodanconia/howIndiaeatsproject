@@ -53,7 +53,7 @@ export function SearchingForFoodGuide() {
             key={ch.id}
             className={`chapter-nav-dot ${i === activeChapter ? 'active' : ''}`}
             onClick={() => scrollToChapter(i)}
-            title={ch.label}
+            data-label={ch.label}
             aria-label={`Go to ${ch.label}`}
           />
         ))}
@@ -86,6 +86,8 @@ export function SearchingForFoodGuide() {
           >
             <img
               src={`/images/food-guide/hero/${dish}.jpg`}
+              srcSet={`/images/food-guide/hero/mobile/${dish}.jpg 512w, /images/food-guide/hero/${dish}.jpg 1024w`}
+              sizes="(max-width: 768px) 200px, 400px"
               alt=""
               loading="eager"
             />
@@ -123,6 +125,8 @@ export function SearchingForFoodGuide() {
       <div className="fullbleed-illustration">
         <img
           src="/images/food-guide/fullbleed-thali.jpg"
+          srcSet="/images/food-guide/fullbleed-thali-mobile.jpg 1200w, /images/food-guide/fullbleed-thali.jpg 3168w"
+          sizes="100vw"
           alt="Watercolor illustration of an Indian thali"
           loading="eager"
         />
@@ -182,6 +186,8 @@ export function SearchingForFoodGuide() {
       <div className="fullbleed-illustration">
         <img
           src="/images/food-guide/sections/spice-market.jpg"
+          srcSet="/images/food-guide/sections/mobile/spice-market.jpg 800w, /images/food-guide/sections/spice-market.jpg 1584w"
+          sizes="100vw"
           alt="Watercolor illustration of an Indian spice market"
           loading="lazy"
         />
@@ -295,6 +301,8 @@ export function SearchingForFoodGuide() {
       <div className="fullbleed-illustration">
         <img
           src="/images/food-guide/sections/dosa-griddle.jpg"
+          srcSet="/images/food-guide/sections/mobile/dosa-griddle.jpg 800w, /images/food-guide/sections/dosa-griddle.jpg 1584w"
+          sizes="100vw"
           alt="Watercolor illustration of dosa being made on a griddle"
           loading="lazy"
         />
@@ -356,6 +364,8 @@ export function SearchingForFoodGuide() {
       <div className="fullbleed-illustration">
         <img
           src="/images/food-guide/sections/festival-sweets.jpg"
+          srcSet="/images/food-guide/sections/mobile/festival-sweets.jpg 800w, /images/food-guide/sections/festival-sweets.jpg 1584w"
+          sizes="100vw"
           alt="Watercolor illustration of Indian festival sweets"
           loading="lazy"
         />
@@ -409,6 +419,8 @@ export function SearchingForFoodGuide() {
       <div className="fullbleed-illustration">
         <img
           src="/images/food-guide/sections/dal-rice-comfort.jpg"
+          srcSet="/images/food-guide/sections/mobile/dal-rice-comfort.jpg 800w, /images/food-guide/sections/dal-rice-comfort.jpg 1584w"
+          sizes="100vw"
           alt="Watercolor illustration of dal and rice"
           loading="lazy"
         />
@@ -454,6 +466,8 @@ export function SearchingForFoodGuide() {
       <div className="fullbleed-illustration">
         <img
           src="/images/food-guide/sections/thali-spread.jpg"
+          srcSet="/images/food-guide/sections/mobile/thali-spread.jpg 800w, /images/food-guide/sections/thali-spread.jpg 1584w"
+          sizes="100vw"
           alt="Watercolor illustration of an Indian feast spread"
           loading="lazy"
         />

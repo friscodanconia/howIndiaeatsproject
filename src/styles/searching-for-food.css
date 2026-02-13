@@ -274,11 +274,39 @@
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 0;
+  position: relative;
+}
+
+.food-guide .chapter-nav-dot::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  color: var(--fg-brown-deep);
+  background: var(--fg-cream);
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.food-guide .chapter-nav-dot:hover::after {
+  opacity: 1;
 }
 
 .food-guide .chapter-nav-dot.active {
   background: var(--fg-coral);
   transform: scale(1.4);
+}
+
+.food-guide .chapter-nav-dot.active::after {
+  font-weight: 600;
 }
 
 .food-guide .chapter-nav-dot:hover {
