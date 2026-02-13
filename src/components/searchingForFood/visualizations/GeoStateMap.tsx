@@ -84,7 +84,7 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
     const svg = d3.select(svgRef.current);
 
     // Parse TopoJSON — filter out island territories that distort the projection
-    const EXCLUDED = new Set(['Andaman & Nicobar', 'Lakshadweep']);
+    const EXCLUDED = new Set(['Andaman and Nicobar Islands', 'Lakshadweep']);
     const topo = topoData as unknown as Topology;
     const objectKey = Object.keys(topo.objects)[0];
     const allFeatures = topojson.feature(

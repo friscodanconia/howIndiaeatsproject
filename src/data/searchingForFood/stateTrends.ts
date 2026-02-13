@@ -6,6 +6,7 @@ import { StateTrend } from './types';
 // Only Sikkim (momos) shows a different #1 via head-to-head state geo queries.
 export const stateTrends: StateTrend[] = [
   { stateId: 'JK', stateName: 'Jammu & Kashmir', topDishes: [{ dishId: 'biryani', volume: 100, rank: 1 }, { dishId: 'roti', volume: 44, rank: 2 }, { dishId: 'jalebi', volume: 37, rank: 3 }] },
+  { stateId: 'LA', stateName: 'Ladakh', topDishes: [{ dishId: 'biryani', volume: 100, rank: 1 }, { dishId: 'roti', volume: 44, rank: 2 }, { dishId: 'thukpa', volume: 35, rank: 3 }] },
   { stateId: 'HP', stateName: 'Himachal Pradesh', topDishes: [{ dishId: 'biryani', volume: 100, rank: 1 }, { dishId: 'roti', volume: 69, rank: 2 }, { dishId: 'jalebi', volume: 69, rank: 3 }] },
   { stateId: 'PB', stateName: 'Punjab', topDishes: [{ dishId: 'biryani', volume: 100, rank: 1 }, { dishId: 'roti', volume: 66, rank: 2 }, { dishId: 'jalebi', volume: 46, rank: 3 }] },
   { stateId: 'UK', stateName: 'Uttarakhand', topDishes: [{ dishId: 'biryani', volume: 100, rank: 1 }, { dishId: 'roti', volume: 49, rank: 2 }, { dishId: 'jalebi', volume: 45, rank: 3 }] },

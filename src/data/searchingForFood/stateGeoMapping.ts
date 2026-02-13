@@ -4,7 +4,7 @@
  * are intentionally omitted — they won't be interactive on the map.
  */
 export const stateGeoMapping: Record<string, string> = {
-  'Jammu & Kashmir': 'JK',
+  'Jammu and Kashmir': 'JK',
   'Ladakh': 'LA',
   'Himachal Pradesh': 'HP',
   'Punjab': 'PB',
