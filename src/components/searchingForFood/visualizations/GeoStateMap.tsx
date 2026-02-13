@@ -196,18 +196,18 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
     setPopup(null);
   };
 
-  // Compute legend dishes: which dishes appear as #1 in visible states
+  // Compute legend dishes based on which rank is shown on the map
   const legendDishes = useMemo(() => {
     const dishIds = new Set<string>();
+    // step 0: #1 dishes (colored), step 1: biryani only, step 2: #2 dishes, step 3+: #1 dishes
+    const rankIndex = activeStep >= 3 ? 0 : activeStep >= 2 ? 1 : 0;
 
     if (activeStep === 1) {
-      // Only biryani highlighted
       dishIds.add('biryani');
-    } else if (activeStep >= 2) {
-      // Show all #1 dishes
+    } else if (activeStep >= 0) {
       stateTrends.forEach(st => {
-        const topDish = st.topDishes[0];
-        if (topDish) dishIds.add(topDish.dishId);
+        const dish = st.topDishes[rankIndex];
+        if (dish) dishIds.add(dish.dishId);
       });
     }
 
