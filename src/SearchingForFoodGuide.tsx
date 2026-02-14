@@ -25,19 +25,12 @@ export function SearchingForFoodGuide() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const chapterRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Scroll progress bar + parallax
+  // Scroll progress bar
   useEffect(() => {
     const onScroll = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       setScrollProgress(docHeight > 0 ? scrollTop / docHeight : 0);
-
-      // Parallax on fullbleed illustrations
-      document.querySelectorAll('.fullbleed-illustration').forEach(el => {
-        const rect = (el as HTMLElement).getBoundingClientRect();
-        const offset = rect.top / window.innerHeight;
-        (el as HTMLElement).style.setProperty('--parallax-offset', `${offset * -20}px`);
-      });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
