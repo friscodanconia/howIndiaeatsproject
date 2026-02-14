@@ -115,10 +115,11 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
         const maxVal = Math.max(...st.monthly);
         const maxIdx = st.monthly.indexOf(maxVal);
 
+        const labelX = Math.max(30, Math.min(w - 30, x(maxIdx)));
         g.append('text')
-          .attr('x', x(maxIdx))
+          .attr('x', labelX)
           .attr('y', y(maxVal) - 10)
-          .attr('text-anchor', 'middle')
+          .attr('text-anchor', labelX <= 30 ? 'start' : labelX >= w - 30 ? 'end' : 'middle')
           .style('font-family', '"Jost", sans-serif')
           .style('font-size', '11px')
           .style('font-weight', '600')
@@ -142,10 +143,11 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
             .transition().duration(600).delay(600)
             .attr('opacity', 0.5);
 
+          const fLabelX = Math.max(30, Math.min(w - 30, x(f.month)));
           g.append('text')
-            .attr('x', x(f.month))
+            .attr('x', fLabelX)
             .attr('y', -5)
-            .attr('text-anchor', 'middle')
+            .attr('text-anchor', fLabelX <= 30 ? 'start' : fLabelX >= w - 30 ? 'end' : 'middle')
             .attr('class', 'viz-annotation')
             .style('font-size', '10px')
             .attr('opacity', 0)

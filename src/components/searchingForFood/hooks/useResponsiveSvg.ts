@@ -15,7 +15,7 @@ export function useResponsiveSvg() {
         setDimensions({
           width: Math.floor(width),
           height: Math.floor(isMobile
-            ? Math.min(width * 0.65, 320)
+            ? Math.min(width * 0.75, 350)
             : Math.min(width * 0.85, 600)),
         });
       }

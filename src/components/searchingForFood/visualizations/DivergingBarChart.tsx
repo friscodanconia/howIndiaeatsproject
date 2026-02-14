@@ -32,7 +32,7 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
     svg.selectAll('*').remove();
 
     const isMobile = width < 500;
-    const margin = { top: isMobile ? 25 : 40, right: isMobile ? 5 : 30, bottom: 20, left: isMobile ? 5 : 30 };
+    const margin = { top: isMobile ? 25 : 40, right: isMobile ? 12 : 30, bottom: 20, left: isMobile ? 12 : 30 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
     const midX = w / 2;
@@ -131,10 +131,11 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           .attr('width', sw);
 
         // Rank number
+        const searchLabelX = Math.max(2, midX - 20 - sw - 5);
         rowGroup.append('text')
-          .attr('x', midX - 20 - sw - 5)
+          .attr('x', searchLabelX)
           .attr('y', yPos + barHeight / 2)
-          .attr('text-anchor', 'end')
+          .attr('text-anchor', searchLabelX <= 2 ? 'start' : 'end')
           .attr('dominant-baseline', 'middle')
           .style('font-size', '9px')
           .attr('class', 'viz-label')
@@ -159,10 +160,11 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           .transition().duration(600).delay(i * 30 + 200).ease(d3.easeBackOut.overshoot(1.3))
           .attr('width', cw);
 
+        const consLabelX = Math.min(w - 2, midX + 20 + cw + 5);
         rowGroup.append('text')
-          .attr('x', midX + 20 + cw + 5)
+          .attr('x', consLabelX)
           .attr('y', yPos + barHeight / 2)
-          .attr('text-anchor', 'start')
+          .attr('text-anchor', consLabelX >= w - 2 ? 'end' : 'start')
           .attr('dominant-baseline', 'middle')
           .style('font-size', '9px')
           .attr('class', 'viz-label')

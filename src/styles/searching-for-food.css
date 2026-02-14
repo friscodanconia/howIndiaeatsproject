@@ -1223,7 +1223,7 @@
     order: -1;
     position: sticky;
     top: 0;
-    height: 48vh;
+    height: 52vh;
     z-index: 10;
     background: var(--fg-cream);
     display: flex;
@@ -1325,6 +1325,14 @@
 
   .food-guide .hero-dish-float {
     display: none;
+  }
+
+  .chatbot-fab {
+    width: 44px;
+    height: 44px;
+    bottom: 1rem;
+    right: 1rem;
+    opacity: 0.85;
   }
 
   .food-guide .food-photo {
