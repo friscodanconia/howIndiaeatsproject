@@ -1219,10 +1219,10 @@
     order: -1;
     position: sticky;
     top: 0;
-    height: 40vh;
+    height: 50vh;
     z-index: 10;
     background: var(--fg-cream);
-    overflow: hidden;
+    overflow: visible;
   }
 
   .food-guide .scrolly-text-col {
@@ -1231,7 +1231,7 @@
   }
 
   .food-guide .viz-wrapper {
-    overflow: hidden;
+    overflow: visible;
   }
 
   .food-guide .scrolly-step {

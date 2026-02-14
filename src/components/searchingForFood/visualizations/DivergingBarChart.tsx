@@ -31,7 +31,8 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    const margin = { top: 40, right: 30, bottom: 20, left: 30 };
+    const isMobile = width < 500;
+    const margin = { top: isMobile ? 25 : 40, right: isMobile ? 5 : 30, bottom: 20, left: isMobile ? 5 : 30 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
     const midX = w / 2;

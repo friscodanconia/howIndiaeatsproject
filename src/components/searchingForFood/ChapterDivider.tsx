@@ -1,14 +1,16 @@
+import { useRef } from 'react';
+
 const STRIPS = [
   '/images/food-guide/spice-strip-1.jpg',
   '/images/food-guide/spice-strip-2.jpg',
   '/images/food-guide/spice-strip-3.jpg',
 ];
 
-let stripIndex = 0;
+let nextIndex = 0;
 
 export function ChapterDivider() {
-  const src = STRIPS[stripIndex % STRIPS.length];
-  stripIndex++;
+  const indexRef = useRef(nextIndex++);
+  const src = STRIPS[indexRef.current % STRIPS.length];
 
   return (
     <div className="chapter-divider">
