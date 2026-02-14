@@ -35,8 +35,9 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
 
     const cols = 3;
     const rows = 2;
-    const margin = { top: 10, right: 10, bottom: 10, left: 10 };
-    const cellPad = { top: 28, right: 8, bottom: 22, left: 25 };
+    const isMobile = width < 500;
+    const margin = { top: 10, right: isMobile ? 2 : 10, bottom: 10, left: isMobile ? 2 : 10 };
+    const cellPad = { top: 28, right: isMobile ? 4 : 8, bottom: 22, left: isMobile ? 20 : 25 };
     const cellW = (width - margin.left - margin.right) / cols;
     const cellH = (height - margin.top - margin.bottom) / rows;
 
@@ -75,7 +76,7 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
         .attr('x', cellPad.left)
         .attr('y', cellPad.top - 10)
         .style('font-family', '"Jost", sans-serif')
-        .style('font-size', '13px')
+        .style('font-size', isMobile ? '10px' : '13px')
         .style('font-weight', '700')
         .attr('fill', '#28211e')
         .text(dish?.name || ps.dishId);
@@ -87,7 +88,7 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
         .attr('y', cellPad.top - 10)
         .attr('text-anchor', 'end')
         .style('font-family', '"Jost", sans-serif')
-        .style('font-size', '12px')
+        .style('font-size', isMobile ? '10px' : '12px')
         .style('font-weight', '700')
         .attr('fill', ps.changePercent > 0 ? '#1a8a8a' : '#e03c34')
         .text(`${sign}${ps.changePercent}%`);

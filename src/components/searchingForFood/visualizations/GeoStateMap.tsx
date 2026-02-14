@@ -294,10 +294,10 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
           display: 'flex',
           flexWrap: 'wrap',
           justifyContent: 'center',
-          gap: '0.5rem 1rem',
-          padding: '0.5rem 0',
+          gap: '0.25rem 0.6rem',
+          padding: '0.25rem 0',
           fontFamily: '"Jost", sans-serif',
-          fontSize: '0.75rem',
+          fontSize: '0.7rem',
         }}>
           {legendDishes.map(d => (
             <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
