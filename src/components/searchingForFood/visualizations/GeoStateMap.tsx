@@ -31,41 +31,58 @@ interface PopupState {
   y: number;
 }
 
+// India geographic center (approx)
+const INDIA_CENTER: [number, number] = [78.9, 22.5];
+
 export function GeoStateMap({ activeStep }: GeoStateMapProps) {
   const { containerRef, dimensions } = useResponsiveSvg();
   const svgRef = useRef<SVGSVGElement>(null);
   const [tooltip, setTooltip] = useState<TooltipState>({ x: 0, y: 0, stateName: '', dishName: '', visible: false });
   const [popup, setPopup] = useState<PopupState | null>(null);
   const projectionRef = useRef<d3.GeoProjection | null>(null);
+  const [showRank, setShowRank] = useState<1 | 2>(1);
+  const prevRankRef = useRef<1 | 2>(1);
 
   // Build lookups
   const trendMap = useRef(new Map(stateTrends.map(s => [s.stateId, s]))).current;
 
-  const getDishColor = useCallback((stateId: string, step: number) => {
-    const trend = trendMap.get(stateId);
-    if (!trend) return '#e7decd';
-    const rankIndex = step >= 3 ? 0 : step >= 2 ? 1 : 0;
-    const dish = trend.topDishes[rankIndex];
-    if (!dish) return '#e7decd';
-
-    if (step === 1) {
-      return dish.dishId === 'biryani' || trend.topDishes[0]?.dishId === 'biryani'
-        ? '#ffcc2d'
-        : '#e7decd';
+  // Auto-toggle rank based on scroll step
+  useEffect(() => {
+    if (activeStep >= 2) {
+      setShowRank(2);
+    } else {
+      setShowRank(1);
     }
+  }, [activeStep]);
 
-    const d = dishMap.get(dish.dishId);
-    return d?.color || '#e7decd';
+  const getDishForState = useCallback((stateId: string, rank: 1 | 2) => {
+    const trend = trendMap.get(stateId);
+    if (!trend) return null;
+    const rankIndex = rank - 1;
+    return trend.topDishes[rankIndex] || null;
   }, [trendMap]);
 
-  const getDishName = useCallback((stateId: string) => {
+  const getDishColor = useCallback((stateId: string, rank: 1 | 2, step: number) => {
     const trend = trendMap.get(stateId);
-    if (!trend) return '';
-    const dish = trend.topDishes[0];
+    if (!trend) return '#e7decd';
+
+    // Step 1: all biryani gold
+    if (step === 1 && rank === 1) {
+      return trend.topDishes[0]?.dishId === 'biryani' ? '#ffcc2d' : '#e7decd';
+    }
+
+    const dish = getDishForState(stateId, rank);
+    if (!dish) return '#e7decd';
+    const d = dishMap.get(dish.dishId);
+    return d?.color || '#e7decd';
+  }, [trendMap, getDishForState]);
+
+  const getDishName = useCallback((stateId: string, rank: 1 | 2) => {
+    const dish = getDishForState(stateId, rank);
     if (!dish) return '';
     const d = dishMap.get(dish.dishId);
     return d?.name || dish.dishId;
-  }, [trendMap]);
+  }, [getDishForState]);
 
   // Close popup on Escape
   useEffect(() => {
@@ -107,6 +124,26 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
 
     const pathGen = d3.geoPath().projection(projection);
 
+    // Compute India center in screen coords for distance-based stagger
+    const indiaScreenCenter = projection(INDIA_CENTER) || [width / 2, height / 2];
+
+    // Compute centroid distances for stagger
+    const centroidDistances = new Map<string, number>();
+    let maxDist = 0;
+    geoFeatures.features.forEach(f => {
+      const centroid = pathGen.centroid(f as any);
+      const dist = Math.sqrt(
+        Math.pow(centroid[0] - indiaScreenCenter[0], 2) +
+        Math.pow(centroid[1] - indiaScreenCenter[1], 2)
+      );
+      centroidDistances.set(f.properties.ST_NM, dist);
+      if (dist > maxDist) maxDist = dist;
+    });
+
+    // Did rank change from previous render?
+    const isRankTransition = prevRankRef.current !== showRank;
+    prevRankRef.current = showRank;
+
     // Data join
     const paths = svg.selectAll<SVGPathElement, typeof geoFeatures.features[0]>('path.state')
       .data(geoFeatures.features, (d: any) => d.properties.ST_NM);
@@ -132,7 +169,7 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
           x: mx,
           y: my - 10,
           stateName: d.properties.ST_NM,
-          dishName: getDishName(stateId),
+          dishName: getDishName(stateId, showRank),
           visible: true,
         });
 
@@ -168,16 +205,23 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
 
     const merged = enter.merge(paths);
 
-    // Animate in
-    merged
-      .transition().duration(600).ease(d3.easeCubicInOut)
-      .attr('d', pathGen as any)
-      .attr('opacity', 1)
-      .attr('fill', d => {
-        const stateId = stateGeoMapping[d.properties.ST_NM];
-        if (!stateId) return '#ece5d8';
-        return getDishColor(stateId, activeStep);
-      });
+    // Animate fill with staggered wave when rank changes
+    merged.each(function (d) {
+      const stateId = stateGeoMapping[d.properties.ST_NM];
+      if (!stateId) return;
+      const targetColor = getDishColor(stateId, showRank, activeStep);
+      const dist = centroidDistances.get(d.properties.ST_NM) || 0;
+      const normalizedDist = maxDist > 0 ? dist / maxDist : 0;
+      const staggerDelay = isRankTransition ? normalizedDist * 800 : 0;
+
+      d3.select(this)
+        .transition()
+        .duration(600)
+        .delay(staggerDelay)
+        .ease(d3.easeBackOut.overshoot(1.3))
+        .attr('opacity', 1)
+        .attr('fill', targetColor);
+    });
 
     // Update selected state ring
     merged.each(function (d) {
@@ -190,22 +234,21 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
 
     paths.exit().remove();
 
-  }, [activeStep, dimensions, getDishColor, getDishName, trendMap, popup?.stateId]);
+  }, [activeStep, dimensions, getDishColor, getDishName, trendMap, popup?.stateId, showRank]);
 
   const handleClickOutside = () => {
     setPopup(null);
   };
 
-  // Compute legend dishes based on which rank is shown on the map
+  // Compute legend dishes based on current rank view
   const legendDishes = useMemo(() => {
     const dishIds = new Set<string>();
-    // step 0: #1 dishes (colored), step 1: biryani only, step 2: #2 dishes, step 3+: #1 dishes
-    const rankIndex = activeStep >= 3 ? 0 : activeStep >= 2 ? 1 : 0;
 
-    if (activeStep === 1) {
+    if (activeStep === 1 && showRank === 1) {
       dishIds.add('biryani');
-    } else if (activeStep >= 0) {
+    } else {
       stateTrends.forEach(st => {
+        const rankIndex = showRank - 1;
         const dish = st.topDishes[rankIndex];
         if (dish) dishIds.add(dish.dishId);
       });
@@ -217,7 +260,7 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
         return dish ? { id, name: dish.name, color: dish.color } : null;
       })
       .filter(Boolean) as { id: string; name: string; color: string }[];
-  }, [activeStep]);
+  }, [activeStep, showRank]);
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -228,6 +271,22 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
         style={{ overflow: 'visible' }}
         onClick={handleClickOutside}
       />
+
+      {/* Rank toggle button */}
+      <div className="geo-rank-toggle">
+        <button
+          className={`geo-rank-btn ${showRank === 1 ? 'active' : ''}`}
+          onClick={() => setShowRank(1)}
+        >
+          #1 Dishes
+        </button>
+        <button
+          className={`geo-rank-btn ${showRank === 2 ? 'active' : ''}`}
+          onClick={() => setShowRank(2)}
+        >
+          Runners-up
+        </button>
+      </div>
 
       {/* Color legend */}
       {legendDishes.length > 0 && (
@@ -267,7 +326,12 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
           }}
         >
           <div className="viz-tooltip-title">{tooltip.stateName}</div>
-          <div style={{ color: '#68594f' }}>{tooltip.dishName}</div>
+          <div style={{ color: '#68594f' }}>
+            {showRank === 2 ? 'Runner-up: ' : ''}{getDishName(
+              stateGeoMapping[tooltip.stateName] || '',
+              showRank
+            )}
+          </div>
         </div>
       )}
 

@@ -57,7 +57,7 @@ export function DishPopupCard({
   const metaRows = (
     <>
       <div className="dish-popup-meta">
-        <span className="dish-popup-meta-label">Origin</span>
+        <span className="dish-popup-meta-label">Region</span>
         <span className="dish-popup-meta-value">{dish.region.join(', ')}</span>
       </div>
       <div className="dish-popup-meta">
@@ -69,6 +69,18 @@ export function DishPopupCard({
           </span>
         </span>
       </div>
+      {dish.cookTime && (
+        <div className="dish-popup-meta">
+          <span className="dish-popup-meta-label">Cook Time</span>
+          <span className="dish-popup-meta-value">{dish.cookTime}</span>
+        </div>
+      )}
+      {dish.difficulty && (
+        <div className="dish-popup-meta">
+          <span className="dish-popup-meta-label">Difficulty</span>
+          <span className="dish-popup-meta-value" style={{ textTransform: 'capitalize' }}>{dish.difficulty}</span>
+        </div>
+      )}
     </>
   );
 
@@ -86,6 +98,10 @@ export function DishPopupCard({
       <div className="dish-popup-meta-list">
         {metaRows}
       </div>
+
+      {dish.origin && (
+        <div className="dish-popup-funfact" style={{ fontStyle: 'normal', fontSize: '0.68rem' }}>{dish.origin}</div>
+      )}
 
       {dish.funFact && (
         <div className="dish-popup-funfact">{dish.funFact}</div>

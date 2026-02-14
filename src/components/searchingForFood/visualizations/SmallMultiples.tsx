@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { useResponsiveSvg } from '../hooks/useResponsiveSvg';
 import { pandemicShifts, dishMap } from '../../../data/searchingForFood';
+import { RichTooltip } from '../RichTooltip';
 
 interface SmallMultiplesProps {
   activeStep: number;
@@ -11,7 +12,7 @@ interface TooltipState {
   visible: boolean;
   x: number;
   y: number;
-  dish: string;
+  dishId: string;
   color: string;
   preAvg: number;
   postAvg: number;
@@ -23,7 +24,7 @@ const MONTHS_SHORT = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'
 export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
   const { containerRef, dimensions } = useResponsiveSvg();
   const svgRef = useRef<SVGSVGElement>(null);
-  const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, dish: '', color: '', preAvg: 0, postAvg: 0, changePercent: 0 });
+  const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, dishId: '', color: '', preAvg: 0, postAvg: 0, changePercent: 0 });
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -132,7 +133,7 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
         .attr('d', areaGen)
         .attr('fill', color)
         .attr('opacity', 0)
-        .transition().duration(600).delay(idx * 100)
+        .transition().duration(600).delay(idx * 100).ease(d3.easeBackOut.overshoot(1.3))
         .attr('opacity', 0.25);
 
       g.append('path')
@@ -143,7 +144,7 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
         .attr('stroke-width', 2)
         .attr('stroke-dasharray', '4,3')
         .attr('opacity', 0)
-        .transition().duration(600).delay(idx * 100)
+        .transition().duration(600).delay(idx * 100).ease(d3.easeBackOut.overshoot(1.3))
         .attr('opacity', 0.8);
 
       // 2019 label
@@ -166,7 +167,7 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
           .attr('d', areaGen)
           .attr('fill', color)
           .attr('opacity', 0)
-          .transition().duration(600).delay(idx * 100 + 400)
+          .transition().duration(600).delay(idx * 100 + 400).ease(d3.easeBackOut.overshoot(1.3))
           .attr('opacity', 0.35);
 
         g.append('path')
@@ -176,7 +177,7 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
           .attr('stroke', darkerColor)
           .attr('stroke-width', 3)
           .attr('opacity', 0)
-          .transition().duration(600).delay(idx * 100 + 400)
+          .transition().duration(600).delay(idx * 100 + 400).ease(d3.easeBackOut.overshoot(1.3))
           .attr('opacity', 1);
 
         g.append('text')
@@ -214,12 +215,11 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
             }
           });
 
-          const [mx, my] = d3.pointer(event, containerRef.current);
           setTooltip({
             visible: true,
-            x: mx,
-            y: my - 10,
-            dish: dish?.name || ps.dishId,
+            x: event.clientX,
+            y: event.clientY - 10,
+            dishId: ps.dishId,
             color,
             preAvg,
             postAvg,
@@ -227,8 +227,7 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
           });
         })
         .on('mousemove', (event) => {
-          const [mx, my] = d3.pointer(event, containerRef.current);
-          setTooltip(prev => ({ ...prev, x: mx, y: my - 10 }));
+          setTooltip(prev => ({ ...prev, x: event.clientX, y: event.clientY - 10 }));
         })
         .on('mouseleave', () => {
           g.select('.cell-bg')
@@ -254,31 +253,14 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
         height={dimensions.height}
         style={{ overflow: 'visible' }}
       />
-      {tooltip.visible && (
-        <div
-          className="viz-tooltip"
-          style={{
-            left: tooltip.x,
-            top: tooltip.y,
-            transform: 'translate(-50%, -100%)',
-            opacity: 1,
-          }}
-        >
-          <div className="viz-tooltip-title" style={{ color: tooltip.color }}>{tooltip.dish}</div>
-          <div style={{ fontSize: '0.8rem', color: '#68594f', marginTop: '0.15rem' }}>
-            <div>2019 avg: <strong style={{ color: '#28211e' }}>{tooltip.preAvg}</strong></div>
-            <div>2021 avg: <strong style={{ color: '#28211e' }}>{tooltip.postAvg}</strong></div>
-          </div>
-          <div style={{
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            color: tooltip.changePercent > 0 ? '#23abab' : '#f9564e',
-            marginTop: '0.15rem',
-          }}>
-            {tooltip.changePercent > 0 ? '+' : ''}{tooltip.changePercent}% change
-          </div>
-        </div>
-      )}
+      <RichTooltip
+        dishId={tooltip.dishId}
+        x={tooltip.x}
+        y={tooltip.y}
+        visible={tooltip.visible}
+        extraLabel={tooltip.visible ? `2019: ${tooltip.preAvg} → 2021: ${tooltip.postAvg} (${tooltip.changePercent > 0 ? '+' : ''}${tooltip.changePercent}%)` : undefined}
+        sparklineType="seasonal"
+      />
     </div>
   );
 }

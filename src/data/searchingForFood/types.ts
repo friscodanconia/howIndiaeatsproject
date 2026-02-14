@@ -10,6 +10,12 @@ export interface Dish {
   color: string;
   funFact?: string;
   recipeUrl?: string;
+  origin?: string;
+  cookTime?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  searchPeakMonth?: number; // 0-11
+  searchPeakReason?: string;
+  relatedDishes?: string[]; // dish IDs
 }
 
 export interface NationalTrend {

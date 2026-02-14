@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { useResponsiveSvg } from '../hooks/useResponsiveSvg';
 import { seasonalTrends, dishMap } from '../../../data/searchingForFood';
+import { RichTooltip } from '../RichTooltip';
 
 interface SeasonalLineChartProps {
   activeStep: number;
@@ -12,7 +13,8 @@ interface TooltipState {
   x: number;
   y: number;
   month: string;
-  items: { name: string; color: string; value: number }[];
+  dishId: string;
+  items: { name: string; color: string; value: number; dishId: string }[];
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -20,7 +22,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
   const { containerRef, dimensions } = useResponsiveSvg();
   const svgRef = useRef<SVGSVGElement>(null);
-  const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, month: '', items: [] });
+  const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, month: '', dishId: '', items: [] });
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -91,7 +93,7 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
           .attr('d', areaGen)
           .attr('fill', color)
           .attr('opacity', 0)
-          .transition().duration(600).delay(idx * 60)
+          .transition().duration(600).delay(idx * 60).ease(d3.easeBackOut.overshoot(1.3))
           .attr('opacity', 0.08);
       }
 
@@ -105,7 +107,7 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
         .attr('class', 'seasonal-line')
         .attr('data-dish', st.dishId)
         .attr('opacity', 0)
-        .transition().duration(600).delay(idx * 60)
+        .transition().duration(600).delay(idx * 60).ease(d3.easeBackOut.overshoot(1.3))
         .attr('opacity', opacity);
 
       // Label on highlighted lines
@@ -183,7 +185,7 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
         crosshair.attr('x1', xPos).attr('x2', xPos).attr('opacity', 0.6);
 
         // Get values for visible dishes at this month
-        const items: { name: string; color: string; value: number }[] = [];
+        const items: { name: string; color: string; value: number; dishId: string }[] = [];
         hoverDots.selectAll('*').remove();
 
         seasonalTrends.forEach(st => {
@@ -192,7 +194,7 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
           if (!isHighlighted || !dish) return;
 
           const val = st.monthly[clampedIdx];
-          items.push({ name: dish.name, color: dish.color, value: val });
+          items.push({ name: dish.name, color: dish.color, value: val, dishId: st.dishId });
 
           hoverDots.append('circle')
             .attr('cx', xPos)
@@ -203,13 +205,14 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
             .attr('stroke-width', 1.5);
         });
 
-        const [containerX, containerY] = d3.pointer(event, containerRef.current);
+        const sortedItems = items.sort((a, b) => b.value - a.value);
         setTooltip({
           visible: true,
-          x: containerX,
-          y: containerY - 10,
+          x: event.clientX,
+          y: event.clientY - 10,
           month: MONTHS[clampedIdx],
-          items: items.sort((a, b) => b.value - a.value),
+          dishId: sortedItems[0]?.dishId || '',
+          items: sortedItems,
         });
       })
       .on('mouseleave', () => {
@@ -228,27 +231,14 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
         height={dimensions.height}
         style={{ overflow: 'visible' }}
       />
-      {tooltip.visible && (
-        <div
-          className="viz-tooltip"
-          style={{
-            left: tooltip.x,
-            top: tooltip.y,
-            transform: 'translate(-50%, -100%)',
-            opacity: 1,
-            minWidth: 120,
-          }}
-        >
-          <div className="viz-tooltip-title">{tooltip.month}</div>
-          {tooltip.items.map(item => (
-            <div key={item.name} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
-              <span style={{ color: '#68594f' }}>{item.name}</span>
-              <span style={{ marginLeft: 'auto', fontWeight: 600, color: '#28211e' }}>{item.value}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      <RichTooltip
+        dishId={tooltip.dishId}
+        x={tooltip.x}
+        y={tooltip.y}
+        visible={tooltip.visible}
+        extraLabel={tooltip.visible ? `${tooltip.month}: ${tooltip.items.map(i => `${i.name} ${i.value}`).join(', ')}` : undefined}
+        sparklineType="seasonal"
+      />
     </div>
   );
 }

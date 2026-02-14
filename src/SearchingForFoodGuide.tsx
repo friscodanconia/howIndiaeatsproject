@@ -3,12 +3,13 @@ import './styles/searching-for-food.css';
 import { ScrollySection } from './components/searchingForFood/ScrollySection';
 import { ChapterTitle } from './components/searchingForFood/ChapterTitle';
 import { ChapterDivider } from './components/searchingForFood/ChapterDivider';
-import { BubbleChart } from './components/searchingForFood/visualizations/BubbleChart';
+import { ThaliChart } from './components/searchingForFood/visualizations/ThaliChart';
 import { GeoStateMap } from './components/searchingForFood/visualizations/GeoStateMap';
 import { RadialWeekChart } from './components/searchingForFood/visualizations/RadialWeekChart';
 import { SeasonalLineChart } from './components/searchingForFood/visualizations/SeasonalLineChart';
 import { DivergingBarChart } from './components/searchingForFood/visualizations/DivergingBarChart';
 import { SmallMultiples } from './components/searchingForFood/visualizations/SmallMultiples';
+import { FoodChatbot } from './components/searchingForFood/FoodChatbot';
 
 const CHAPTERS = [
   { id: 'ch1', label: 'The Hook' },
@@ -21,7 +22,26 @@ const CHAPTERS = [
 
 export function SearchingForFoodGuide() {
   const [activeChapter, setActiveChapter] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const chapterRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Scroll progress bar + parallax
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(docHeight > 0 ? scrollTop / docHeight : 0);
+
+      // Parallax on fullbleed illustrations
+      document.querySelectorAll('.fullbleed-illustration').forEach(el => {
+        const rect = (el as HTMLElement).getBoundingClientRect();
+        const offset = rect.top / window.innerHeight;
+        (el as HTMLElement).style.setProperty('--parallax-offset', `${offset * -20}px`);
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -46,6 +66,12 @@ export function SearchingForFoodGuide() {
 
   return (
     <div className="food-guide">
+      {/* Scroll progress bar */}
+      <div className="scroll-progress-bar" style={{ transform: `scaleX(${scrollProgress})` }} />
+
+      {/* Portal root for rich tooltips */}
+      <div id="rich-tooltip-root" style={{ position: 'fixed', top: 0, left: 0, width: 0, height: 0, zIndex: 500, pointerEvents: 'none' }} />
+
       {/* Chapter nav dots */}
       <nav className="chapter-nav">
         {CHAPTERS.map((ch, i) => (
@@ -145,8 +171,8 @@ export function SearchingForFoodGuide() {
           </p>
           <p>
             But beneath the biryani juggernaut lies a rich ecosystem of dishes that tell a more
-            nuanced story. The bubbles below show the 20 most searched dishes in India, sized by
-            their relative search interest over the past five years.
+            nuanced story. The thali below arranges the 20 most searched dishes in India as katoris
+            on a plate, sized by their relative search interest over the past five years.
           </p>
         </div>
 
@@ -178,7 +204,7 @@ export function SearchingForFoodGuide() {
               ),
             },
           ]}
-          visualization={(step) => <BubbleChart activeStep={step} />}
+          visualization={(step) => <ThaliChart activeStep={step} />}
         />
       </div>
 
@@ -487,6 +513,9 @@ export function SearchingForFoodGuide() {
           story that 1.4 billion people are writing together, one search at a time.
         </p>
       </div>
+
+      {/* AI Food Chatbot (floating) */}
+      <FoodChatbot />
 
       {/* Share section */}
       <div className="food-share-section">

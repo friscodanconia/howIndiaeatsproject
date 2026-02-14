@@ -3,6 +3,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 export function useScrollytelling(stepCount: number) {
   const [activeStep, setActiveStep] = useState(0);
   const stepsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const debounceRef = useRef<number>(0);
 
   const setStepRef = useCallback((index: number) => (el: HTMLDivElement | null) => {
     stepsRef.current[index] = el;
@@ -14,7 +15,13 @@ export function useScrollytelling(stepCount: number) {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const index = stepsRef.current.indexOf(entry.target as HTMLDivElement);
-            if (index !== -1) setActiveStep(index);
+            if (index !== -1) {
+              // Debounce step transitions by 200ms
+              clearTimeout(debounceRef.current);
+              debounceRef.current = window.setTimeout(() => {
+                setActiveStep(index);
+              }, 200);
+            }
           }
         });
       },
@@ -25,7 +32,10 @@ export function useScrollytelling(stepCount: number) {
       if (ref) observer.observe(ref);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(debounceRef.current);
+    };
   }, [stepCount]);
 
   return { activeStep, setStepRef };

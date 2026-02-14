@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { useResponsiveSvg } from '../hooks/useResponsiveSvg';
 import { consumptionGap, dishMap } from '../../../data/searchingForFood';
+import { RichTooltip } from '../RichTooltip';
 
 interface DivergingBarChartProps {
   activeStep: number;
@@ -11,7 +12,7 @@ interface TooltipState {
   visible: boolean;
   x: number;
   y: number;
-  dish: string;
+  dishId: string;
   searchRank: number;
   consumptionRank: number;
   gap: number;
@@ -21,7 +22,7 @@ interface TooltipState {
 export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
   const { containerRef, dimensions } = useResponsiveSvg();
   const svgRef = useRef<SVGSVGElement>(null);
-  const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, dish: '', searchRank: 0, consumptionRank: 0, gap: 0, note: '' });
+  const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, dishId: '', searchRank: 0, consumptionRank: 0, gap: 0, note: '' });
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -125,7 +126,7 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           .attr('opacity', 0.7)
           .attr('rx', 2)
           .attr('class', 'search-bar')
-          .transition().duration(600).delay(i * 30)
+          .transition().duration(600).delay(i * 30).ease(d3.easeBackOut.overshoot(1.3))
           .attr('width', sw);
 
         // Rank number
@@ -154,7 +155,7 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           .attr('opacity', 0.5)
           .attr('rx', 2)
           .attr('class', 'consumption-bar')
-          .transition().duration(600).delay(i * 30 + 200)
+          .transition().duration(600).delay(i * 30 + 200).ease(d3.easeBackOut.overshoot(1.3))
           .attr('width', cw);
 
         rowGroup.append('text')
@@ -196,12 +197,11 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
             }
           });
 
-          const [mx, my] = d3.pointer(event, containerRef.current);
           setTooltip({
             visible: true,
-            x: mx,
-            y: my - 10,
-            dish: dish?.name || item.dishId,
+            x: event.clientX,
+            y: event.clientY - 10,
+            dishId: item.dishId,
             searchRank: item.searchRank,
             consumptionRank: item.consumptionRank,
             gap: item.consumptionRank - item.searchRank,
@@ -209,8 +209,7 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           });
         })
         .on('mousemove', (event) => {
-          const [mx, my] = d3.pointer(event, containerRef.current);
-          setTooltip(prev => ({ ...prev, x: mx, y: my - 10 }));
+          setTooltip(prev => ({ ...prev, x: event.clientX, y: event.clientY - 10 }));
         })
         .on('mouseleave', () => {
           g.selectAll('g.bar-row')
@@ -230,37 +229,13 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
         height={dimensions.height}
         style={{ overflow: 'visible' }}
       />
-      {tooltip.visible && (
-        <div
-          className="viz-tooltip"
-          style={{
-            left: tooltip.x,
-            top: tooltip.y,
-            transform: 'translate(-50%, -100%)',
-            opacity: 1,
-            maxWidth: 220,
-          }}
-        >
-          <div className="viz-tooltip-title">{tooltip.dish}</div>
-          <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.8rem', color: '#68594f', marginTop: '0.2rem' }}>
-            <span>Search: <strong style={{ color: '#28211e' }}>#{tooltip.searchRank}</strong></span>
-            <span>Eaten: <strong style={{ color: '#28211e' }}>#{tooltip.consumptionRank}</strong></span>
-          </div>
-          {tooltip.gap !== 0 && (
-            <div style={{
-              fontSize: '0.75rem',
-              color: tooltip.gap > 0 ? '#f9564e' : '#23abab',
-              marginTop: '0.15rem',
-              fontWeight: 500,
-            }}>
-              {tooltip.gap > 0 ? `Eaten ${tooltip.gap} ranks lower` : `Eaten ${Math.abs(tooltip.gap)} ranks higher`}
-            </div>
-          )}
-          <div style={{ fontSize: '0.75rem', color: '#afa39c', marginTop: '0.25rem', fontStyle: 'italic' }}>
-            {tooltip.note}
-          </div>
-        </div>
-      )}
+      <RichTooltip
+        dishId={tooltip.dishId}
+        x={tooltip.x}
+        y={tooltip.y}
+        visible={tooltip.visible}
+        extraLabel={tooltip.visible ? `Search #${tooltip.searchRank} · Eaten #${tooltip.consumptionRank}${tooltip.gap !== 0 ? ` (${tooltip.gap > 0 ? '↓' : '↑'}${Math.abs(tooltip.gap)})` : ''}` : undefined}
+      />
     </div>
   );
 }

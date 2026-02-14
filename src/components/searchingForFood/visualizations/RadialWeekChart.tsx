@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useResponsiveSvg } from '../hooks/useResponsiveSvg';
 import { weeklyPatterns, dishMap } from '../../../data/searchingForFood';
+import { RichTooltip } from '../RichTooltip';
 
 interface RadialWeekChartProps {
   activeStep: number;
@@ -11,8 +12,7 @@ interface TooltipState {
   visible: boolean;
   x: number;
   y: number;
-  dish: string;
-  color: string;
+  dishId: string;
   day: string;
   value: number;
 }
@@ -22,7 +22,7 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
   const { containerRef, dimensions } = useResponsiveSvg();
   const svgRef = useRef<SVGSVGElement>(null);
-  const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, dish: '', color: '', day: '', value: 0 });
+  const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, dishId: '', day: '', value: 0 });
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -90,9 +90,6 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
       .radius(d => radiusScale(d))
       .curve(d3.curveCardinalClosed.tension(0.4));
 
-    // Store dish groups for hover interactions
-    const dishGroups: { dishId: string; area: d3.Selection<SVGPathElement, number[], null, undefined>; line: d3.Selection<SVGPathElement, number[], null, undefined>; color: string; name: string }[] = [];
-
     // Draw each dish's radial line
     weeklyPatterns.forEach((wp, idx) => {
       const dish = dishMap.get(wp.dishId);
@@ -113,17 +110,17 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
         .outerRadius(d => radiusScale(d))
         .curve(d3.curveCardinalClosed.tension(0.4));
 
-      const area = g.append('path')
+      g.append('path')
         .datum(wp.pattern as number[])
         .attr('d', areaGen as any)
         .attr('fill', color)
         .attr('opacity', opacity * 0.2)
         .attr('data-dish', wp.dishId)
-        .transition().duration(600)
+        .transition().duration(600).ease(d3.easeBackOut.overshoot(1.3))
         .attr('opacity', opacity * 0.2);
 
       // Outline
-      const line = g.append('path')
+      g.append('path')
         .datum(wp.pattern as number[])
         .attr('d', lineGen as any)
         .attr('fill', 'none')
@@ -131,16 +128,8 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
         .attr('stroke-width', strokeWidth)
         .attr('data-dish', wp.dishId)
         .attr('opacity', 0)
-        .transition().duration(600).delay(idx * 80)
+        .transition().duration(600).delay(idx * 80).ease(d3.easeBackOut.overshoot(1.3))
         .attr('opacity', opacity);
-
-      dishGroups.push({
-        dishId: wp.dishId,
-        area: g.select(`path[data-dish="${wp.dishId}"][fill="${color}"]`) as any,
-        line: g.select(`path[data-dish="${wp.dishId}"][stroke="${color}"]`) as any,
-        color,
-        name: dish?.name || wp.dishId,
-      });
 
       // Label
       if (isHighlighted && dish) {
@@ -166,9 +155,6 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
 
     // Invisible overlay circles at each data point for hover
     weeklyPatterns.forEach(wp => {
-      const dish = dishMap.get(wp.dishId);
-      const color = dish?.color || '#ccc';
-
       const isHighlighted =
         (activeStep === 1 && wp.dishId === 'biryani') ||
         (activeStep === 2 && wp.dishId === 'dal-rice') ||
@@ -193,13 +179,13 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
               return el.attr('data-dish') === wp.dishId ? 0.9 : 0.05;
             });
 
-            const [mx, my] = d3.pointer(event, containerRef.current);
+            const rect = containerRef.current?.getBoundingClientRect();
+            if (!rect) return;
             setTooltip({
               visible: true,
-              x: mx,
-              y: my - 10,
-              dish: dish?.name || wp.dishId,
-              color,
+              x: event.clientX,
+              y: event.clientY - 10,
+              dishId: wp.dishId,
               day: DAYS[dayIdx],
               value: val,
             });
@@ -210,8 +196,6 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
               const el = d3.select(this);
               const elDish = el.attr('data-dish');
               if (!elDish) return;
-              const wp2 = weeklyPatterns.find(w => w.dishId === elDish);
-              if (!wp2) return;
               const isH =
                 (activeStep === 1 && elDish === 'biryani') ||
                 (activeStep === 2 && elDish === 'dal-rice') ||
@@ -269,22 +253,14 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
         ))}
       </div>
 
-      {tooltip.visible && (
-        <div
-          className="viz-tooltip"
-          style={{
-            left: tooltip.x,
-            top: tooltip.y,
-            transform: 'translate(-50%, -100%)',
-            opacity: 1,
-          }}
-        >
-          <div className="viz-tooltip-title" style={{ color: tooltip.color }}>{tooltip.dish}</div>
-          <div style={{ color: '#68594f', fontSize: '0.8rem' }}>
-            {tooltip.day}: <strong>{tooltip.value}</strong>
-          </div>
-        </div>
-      )}
+      <RichTooltip
+        dishId={tooltip.dishId}
+        x={tooltip.x}
+        y={tooltip.y}
+        visible={tooltip.visible}
+        extraLabel={tooltip.visible ? `${tooltip.day}: ${tooltip.value}` : undefined}
+        sparklineType="weekly"
+      />
     </div>
   );
 }
