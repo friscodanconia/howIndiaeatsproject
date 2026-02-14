@@ -56,8 +56,8 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
 
   useEffect(() => {
     if (!svgRef.current) return;
-
     const { width, height } = dimensions;
+    if (width === 0 || height === 0) return;
     const svg = d3.select(svgRef.current);
     const cx = width / 2;
     const cy = height / 2;

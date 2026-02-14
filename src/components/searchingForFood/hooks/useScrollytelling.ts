@@ -10,6 +10,14 @@ export function useScrollytelling(stepCount: number) {
   }, []);
 
   useEffect(() => {
+    // On mobile, the sticky viz takes the top ~48vh, so we use an asymmetric
+    // rootMargin that places the trigger zone in the lower part of the viewport
+    // where text cards actually appear. Desktop uses a centered 20% zone.
+    const isMobile = window.innerWidth < 768;
+    const rootMargin = isMobile
+      ? '-45% 0px -20% 0px'   // trigger zone: 45-80% from top (where text is)
+      : '-40% 0px -40% 0px';  // trigger zone: 40-60% from top (centered)
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
@@ -25,7 +33,7 @@ export function useScrollytelling(stepCount: number) {
           }
         });
       },
-      { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
+      { rootMargin, threshold: 0 }
     );
 
     stepsRef.current.forEach(ref => {

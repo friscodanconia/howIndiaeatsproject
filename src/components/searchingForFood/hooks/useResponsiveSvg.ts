@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 
 export function useResponsiveSvg() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 600, height: 500 });
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -11,9 +11,12 @@ export function useResponsiveSvg() {
     const observer = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { width } = entry.contentRect;
+        const isMobile = width < 500;
         setDimensions({
           width: Math.floor(width),
-          height: Math.floor(Math.min(width * 0.85, 600)),
+          height: Math.floor(isMobile
+            ? Math.min(width * 0.65, 320)
+            : Math.min(width * 0.85, 600)),
         });
       }
     });

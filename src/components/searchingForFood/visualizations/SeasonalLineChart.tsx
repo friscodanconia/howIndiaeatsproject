@@ -26,8 +26,8 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
 
   useEffect(() => {
     if (!svgRef.current) return;
-
     const { width, height } = dimensions;
+    if (width === 0 || height === 0) return;
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
