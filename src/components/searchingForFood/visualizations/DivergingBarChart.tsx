@@ -85,9 +85,11 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
       const dish = dishMap.get(item.dishId);
       const color = dish?.color || '#ccc';
       const yPos = i * (barHeight + barGap);
+      // On mobile, show all data at once since there's no sticky scrollytelling
+      const mobileShowAll = isMobile;
       const showSearch = activeStep >= 0;
-      const showConsumption = activeStep >= 1;
-      const showGap = activeStep >= 2;
+      const showConsumption = mobileShowAll || activeStep >= 1;
+      const showGap = mobileShowAll || activeStep >= 2;
 
       // Row group for hover
       const rowGroup = g.append('g')
