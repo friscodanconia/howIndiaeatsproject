@@ -85,13 +85,16 @@ export function SearchingForFoodGuide() {
           style={{ backgroundImage: 'url(/images/food-guide/hero-bg.jpg)' }}
         />
 
-        {/* Large watercolor food illustrations at corners */}
+        {/* Watercolor food illustrations framing the title — 7 dishes in a ring */}
         {[
-          { dish: 'biryani', size: 220, top: '-2%', left: '-3%', delay: 0, rotate: -12 },
-          { dish: 'dosa', size: 200, top: '-2%', right: '-3%', delay: 0.3, rotate: 10 },
-          { dish: 'tandoori', size: 200, bottom: '-2%', left: '-2%', delay: 0.6, rotate: 8 },
-          { dish: 'samosa', size: 190, bottom: '-2%', right: '-2%', delay: 0.9, rotate: -8 },
-        ].map(({ dish, size, delay, rotate, ...pos }) => (
+          { dish: 'biryani', size: 300, top: '-5%', left: '2%', delay: 0, rotate: -8 },
+          { dish: 'jalebi', size: 240, top: '-6%', left: '50%', delay: 0.15, rotate: 5, marginLeft: -120 },
+          { dish: 'dosa', size: 290, top: '-4%', right: '2%', delay: 0.3, rotate: 8 },
+          { dish: 'chai', size: 250, top: '33%', left: '-3%', delay: 0.45, rotate: -5 },
+          { dish: 'momos', size: 250, top: '33%', right: '-3%', delay: 0.6, rotate: 8 },
+          { dish: 'tandoori', size: 280, bottom: '-4%', left: '3%', delay: 0.75, rotate: 10 },
+          { dish: 'samosa', size: 260, bottom: '-4%', right: '3%', delay: 0.9, rotate: -6 },
+        ].map(({ dish, size, delay, rotate, marginLeft, ...pos }) => (
           <div
             key={dish}
             className="hero-dish-float"
@@ -99,6 +102,7 @@ export function SearchingForFoodGuide() {
               width: size,
               height: size,
               ...pos,
+              ...(marginLeft ? { marginLeft } : {}),
               animationDelay: `${delay}s`,
               transform: `rotate(${rotate}deg)`,
             }}
