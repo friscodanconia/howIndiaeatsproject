@@ -29,8 +29,8 @@
   font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
   background-color: var(--fg-cream);
   color: var(--fg-brown);
-  line-height: 1.7;
-  font-size: 1rem;
+  line-height: 1.75;
+  font-size: 1.125rem;
   min-height: 100vh;
 }
 

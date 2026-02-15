@@ -132,15 +132,19 @@ export function SearchingForFoodGuide() {
       {/* Intro prose */}
       <div className="content-col" style={{ marginBottom: '3rem' }}>
         <p>
-          India is a country that thinks about food constantly. From the first morning chai to the
-          last evening snack, food threads through every conversation, every festival, every family
-          gathering. And increasingly, it threads through our search bars too.
+          Late on a Sunday afternoon, someone in Lucknow types "biryani recipe" into Google.
+          At the same moment, a college student in Chennai searches for "dosa batter ratio,"
+          a mother in Kolkata looks up "rosogolla syrup consistency," and a homesick
+          engineer in Bangalore just types "mom dal recipe." Every day, millions of Indians
+          turn to their search bars with the same quiet hunger — not just for food, but
+          for the memory and comfort that a dish carries.
         </p>
         <p>
-          Google search data reveals which dishes capture our collective curiosity — and which ones
-          we eat every day without a second thought. As you scroll through the following interactive
-          graphics, you'll discover how roughly 30 iconic dishes reflect the culture, geography,
-          and rhythms of a nation of 1.4 billion people.
+          What happens when you look at all those searches together? You get a mirror.
+          Not of what India eats — but of what India <em>dreams</em> of eating.
+          Over five years of Google Trends data across 30 dishes and 28 states,
+          a surprising story emerges: of a country united by one dish, divided by its
+          runners-up, and quietly nourished by foods that never trend at all.
         </p>
       </div>
 
