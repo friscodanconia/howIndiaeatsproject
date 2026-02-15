@@ -123,9 +123,11 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
       ),
     };
 
-    // Projection — fit to mainland only
-    const projection = d3.geoMercator().fitSize(
-      [width, height * 0.95],
+    // Projection — fit to mainland only, with horizontal padding on mobile
+    const isMobile = width < 500;
+    const pad = isMobile ? width * 0.08 : 0;
+    const projection = d3.geoMercator().fitExtent(
+      [[pad, 0], [width - pad, height * 0.95]],
       geoFeatures as any
     );
     projectionRef.current = projection;
