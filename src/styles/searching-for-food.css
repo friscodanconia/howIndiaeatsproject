@@ -51,17 +51,19 @@
 }
 
 .food-guide h2 {
-  font-size: clamp(1.75rem, 3vw, 3rem);
+  font-size: clamp(2rem, 3.5vw, 3.25rem);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   margin-bottom: 1rem;
 }
 
 .food-guide h3 {
-  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-  font-weight: 500;
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  font-weight: 600;
   color: var(--fg-coral);
-  margin-bottom: 0.75rem;
+  letter-spacing: -0.005em;
+  margin-bottom: 0.5rem;
 }
 
 .food-guide h4 {
@@ -73,8 +75,47 @@
 }
 
 .food-guide p {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   max-width: var(--fg-content-width);
+}
+
+/* Drop cap on first paragraph of intro and chapter openers */
+.food-guide .content-col > p:first-child::first-letter,
+.food-guide .intro-prose > p:first-child::first-letter {
+  font-family: 'Jost', sans-serif;
+  font-weight: 700;
+  font-size: 3.5em;
+  float: left;
+  line-height: 0.8;
+  margin-right: 0.08em;
+  margin-top: 0.05em;
+  color: var(--fg-coral);
+}
+
+/* Intro prose — slightly larger opening */
+.food-guide .intro-prose > p:first-child {
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: var(--fg-brown);
+}
+
+/* Conclusion — larger, centered, reflective */
+.food-guide .conclusion-prose {
+  text-align: center;
+  max-width: 55ch;
+}
+
+.food-guide .conclusion-prose p {
+  font-size: 1.2rem;
+  font-style: italic;
+  line-height: 1.8;
+  color: var(--fg-brown-annotation);
+}
+
+.food-guide .conclusion-prose p:last-child {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--fg-brown);
 }
 
 /* Links */
@@ -222,23 +263,34 @@
   padding: 1.5rem 2rem;
   border-radius: var(--fg-radius-md);
   box-shadow: var(--fg-shadow-md);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.food-guide .scrolly-step-content p {
+  margin-bottom: 0.75rem;
+}
+
+.food-guide .scrolly-step-content p:last-child {
+  margin-bottom: 0;
 }
 
 /* Chapter title card */
 .food-guide .chapter-title {
   text-align: center;
-  padding: 6rem 2rem;
+  padding: 5rem 2rem 4rem;
   position: relative;
 }
 
 .food-guide .chapter-label {
   font-family: 'Jost', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--fg-brown-muted);
-  margin-bottom: 1rem;
+  letter-spacing: 0.2em;
+  color: var(--fg-coral);
+  margin-bottom: 0.75rem;
+  opacity: 0.8;
 }
 
 /* Chapter divider */

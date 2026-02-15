@@ -130,7 +130,7 @@ export function SearchingForFoodGuide() {
       </header>
 
       {/* Intro prose */}
-      <div className="content-col" style={{ marginBottom: '3rem' }}>
+      <div className="content-col intro-prose" style={{ marginBottom: '3rem' }}>
         <p>
           Late on a Sunday afternoon, someone in Lucknow types "biryani recipe" into Google.
           At the same moment, a college student in Chennai searches for "dosa batter ratio,"
@@ -504,7 +504,7 @@ export function SearchingForFoodGuide() {
       </div>
 
       {/* Conclusion */}
-      <div className="content-col" style={{ padding: '4rem 1.5rem' }}>
+      <div className="content-col conclusion-prose" style={{ padding: '4rem 1.5rem' }}>
         <p>
           Food search data is a mirror. Not of what India eats, but of what India <em>aspires</em> to eat,
           what it celebrates, what it misses when it's away from home. Behind every search query is a
