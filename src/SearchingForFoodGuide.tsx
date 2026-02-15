@@ -140,11 +140,13 @@ export function SearchingForFoodGuide() {
           for the memory and comfort that a dish carries.
         </p>
         <p>
-          What happens when you look at all those searches together? You get a mirror.
-          Not of what India eats — but of what India <em>dreams</em> of eating.
-          Over five years of Google Trends data across 30 dishes and 28 states,
-          a surprising story emerges: of a country united by one dish, divided by its
-          runners-up, and quietly nourished by foods that never trend at all.
+          What happens when you look at all those searches together — and then hold them
+          up against delivery orders, government nutrition surveys, and festival calendars?
+          You get a mirror. Not of what India eats — but of the gap between what India
+          {' '}<em>dreams</em> of eating and what it actually lives on. Across 30 dishes,
+          28 states, and five years of data, a surprising story emerges: of a country
+          united by one dish, divided by its runners-up, and quietly nourished by foods
+          that never trend at all.
         </p>
       </div>
 
