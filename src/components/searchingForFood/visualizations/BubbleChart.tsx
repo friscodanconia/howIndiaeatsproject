@@ -278,6 +278,14 @@ export function BubbleChart({ activeStep }: BubbleChartProps) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [popup.visible, closePopup]);
 
+  // Close popup on scroll
+  useEffect(() => {
+    if (!popup.visible) return;
+    const handleScroll = () => closePopup();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [popup.visible, closePopup]);
+
   // Close popup when step changes
   useEffect(() => {
     closePopup();

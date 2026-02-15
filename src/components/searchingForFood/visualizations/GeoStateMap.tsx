@@ -93,6 +93,14 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
     return () => window.removeEventListener('keydown', handleKey);
   }, []);
 
+  // Close popup on scroll
+  useEffect(() => {
+    if (!popup) return;
+    const handleScroll = () => setPopup(null);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [popup]);
+
   // D3 rendering
   useEffect(() => {
     if (!svgRef.current) return;

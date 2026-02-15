@@ -361,6 +361,14 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [popup.visible, closePopup]);
 
+  // Close popup on scroll
+  useEffect(() => {
+    if (!popup.visible) return;
+    const handleScroll = () => closePopup();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [popup.visible, closePopup]);
+
   // Render popup
   const dish = popup.visible ? dishMap.get(popup.dishId) : null;
   const trend = popup.visible ? nationalTrends.find(t => t.dishId === popup.dishId) : null;

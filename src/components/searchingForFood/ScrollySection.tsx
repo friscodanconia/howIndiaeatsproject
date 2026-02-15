@@ -16,6 +16,13 @@ export function ScrollySection({ id, steps, visualization }: ScrollySectionProps
 
   return (
     <section id={id} className="scrolly-grid">
+      {/* Sticky visualization — must come first in DOM for mobile sticky to work */}
+      <div className="scrolly-sticky">
+        <div className="viz-wrapper">
+          {visualization(activeStep)}
+        </div>
+      </div>
+
       {/* Text column */}
       <div className="scrolly-text-col">
         {steps.map((step, i) => (
@@ -29,13 +36,6 @@ export function ScrollySection({ id, steps, visualization }: ScrollySectionProps
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Sticky visualization column */}
-      <div className="scrolly-sticky">
-        <div className="viz-wrapper">
-          {visualization(activeStep)}
-        </div>
       </div>
     </section>
   );

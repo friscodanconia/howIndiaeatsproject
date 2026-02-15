@@ -10,9 +10,10 @@ export function useScrollytelling(stepCount: number) {
   }, []);
 
   useEffect(() => {
-    // On mobile (no sticky), use a centered trigger zone.
-    // On desktop, sticky viz takes half the screen so use centered zone too.
-    const rootMargin = '-35% 0px -35% 0px';
+    // On mobile split-screen, text is in bottom 55% so trigger in that zone.
+    // On desktop, sticky viz takes half the screen so use centered zone.
+    const isMobile = window.innerWidth <= 768;
+    const rootMargin = isMobile ? '-60% 0px -10% 0px' : '-35% 0px -35% 0px';
 
     const observer = new IntersectionObserver(
       (entries) => {

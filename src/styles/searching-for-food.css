@@ -188,6 +188,8 @@
 
 .food-guide .scrolly-text-col {
   position: relative;
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .food-guide .scrolly-sticky {
@@ -197,6 +199,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .food-guide .scrolly-step {
@@ -1208,65 +1212,84 @@
   .food-guide {
     font-size: 1rem;
     overflow-x: clip;
+    max-width: 100vw;
+  }
+
+  .food-guide p {
+    max-width: 100%;
   }
 
   /* ==========================================================
-     MOBILE SCROLLYTELLING: NO STICKY
-     Viz sits at top of section at natural size. Text flows below.
-     Nothing overlaps. Nothing covers the visualization.
+     MOBILE SCROLLYTELLING: SPLIT-SCREEN
+     Viz pinned in top 55vh, text scrolls in bottom 45vh.
+     No overlap, fully readable.
      ========================================================== */
   .food-guide .scrolly-grid {
-    display: flex;
-    flex-direction: column;
+    display: block;
     padding: 0;
+    width: 100%;
   }
 
   .food-guide .scrolly-sticky {
-    order: -1;
-    position: relative; /* NOT sticky — no overlapping */
-    height: auto;
+    position: sticky;
+    top: 0;
+    height: 45svh;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 2;
     background: var(--fg-cream);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem 0;
-  }
-
-  .food-guide .scrolly-text-col {
-    position: relative;
+    border-bottom: 1px solid rgba(97, 61, 31, 0.1);
   }
 
   .food-guide .viz-wrapper {
     width: 100%;
+    height: 100%;
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: center;
+  }
+
+  .food-guide .scrolly-text-col {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
   }
 
   .food-guide .scrolly-step {
-    padding: 0.75rem 1rem;
-    opacity: 1 !important;
-    transition: none;
+    min-height: 55svh;
+    padding: 1.25rem 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    opacity: 0.35;
+    transition: opacity 0.4s ease;
+    box-sizing: border-box;
   }
 
-  .food-guide .scrolly-step .scrolly-step-content {
+  .food-guide .scrolly-step.active {
+    opacity: 1;
+  }
+
+  .food-guide .scrolly-step-content {
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
     border-left: 3px solid transparent;
+    padding-left: 1rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    box-sizing: border-box;
     transition: border-color 0.3s ease;
   }
 
   .food-guide .scrolly-step.active .scrolly-step-content {
     border-left-color: var(--fg-coral);
-  }
-
-  .food-guide .scrolly-step-content {
-    padding: 1rem 1.25rem;
-    overflow-wrap: break-word;
-    word-break: break-word;
-    max-width: 100%;
-    box-sizing: border-box;
-    border-radius: 8px;
-    background: rgba(244, 239, 229, 0.95);
-    box-shadow: 0 1px 4px rgba(97, 61, 31, 0.08);
   }
 
   /* Chapter title — tighter on mobile */
@@ -1276,8 +1299,11 @@
 
   /* Content column */
   .food-guide .content-col {
-    padding: 0 1rem;
+    padding: 0 1.25rem;
     max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    box-sizing: border-box;
   }
 
   /* Fullbleed illustrations */
