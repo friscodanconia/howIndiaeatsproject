@@ -323,7 +323,7 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
           .delay(1400)
           .duration(300)
           .attr('transform', `translate(${d.targetX},${d.targetY}) scale(1.05)`)
-          .transition('pulse')
+          .transition()
           .duration(300)
           .attr('transform', `translate(${d.targetX},${d.targetY}) scale(1)`);
       });
