@@ -136,13 +136,13 @@ export function SearchingForFoodGuide() {
           At the same moment, a college student in Chennai searches for "dosa batter ratio,"
           a mother in Kolkata looks up "rosogolla syrup consistency," and a homesick
           engineer in Bangalore just types "mom dal recipe." Every day, millions of Indians
-          turn to their search bars with the same quiet hunger — not just for food, but
+          turn to their search bars with the same quiet hunger. Not just for food, but
           for the memory and comfort that a dish carries.
         </p>
         <p>
-          What happens when you look at all those searches together — and then hold them
+          What happens when you look at all those searches together, and then hold them
           up against delivery orders, government nutrition surveys, and festival calendars?
-          You get a mirror. Not of what India eats — but of the gap between what India
+          You get a mirror. Not of what India eats, but of the gap between what India
           {' '}<em>dreams</em> of eating and what it actually lives on. Across 30 dishes,
           28 states, and five years of data, a surprising story emerges: of a country
           united by one dish, divided by its runners-up, and quietly nourished by foods
@@ -167,7 +167,7 @@ export function SearchingForFoodGuide() {
 
         <div className="content-col" style={{ marginBottom: '2rem' }}>
           <p>
-            It's not even close. Biryani is the most searched food in India — and has been for as
+            It's not even close. Biryani is the most searched food in India, and has been for as
             long as Google Trends data exists. What's surprising is what comes next: roti, the
             humblest bread, is #2. If India's food identity had a single search ambassador, the
             data says it would be biryani. But the full picture tells a richer story.
@@ -194,7 +194,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>The top five</h3>
-                  <p>Roti, Dosa, Idli, and Momos round out the top five. The surprise? India's most basic everyday bread sits at #2 — people search to perfect what they eat daily. Dosa and idli represent the South; momos the Northeast and Delhi's street food scene.</p>
+                  <p>Roti, Dosa, Idli, and Momos round out the top five. The surprise? India's most basic everyday bread sits at #2. People search to perfect what they eat daily. Dosa and idli represent the South; momos the Northeast and Delhi's street food scene.</p>
                 </div>
               ),
             },
@@ -228,10 +228,10 @@ export function SearchingForFoodGuide() {
 
         <div className="content-col" style={{ marginBottom: '2rem' }}>
           <p>
-            Here's the plot twist the data reveals: biryani isn't just #1 nationally — it
+            Here's the plot twist the data reveals: biryani isn't just #1 nationally. It
             dominates search in virtually every single state. From Kashmir to Kerala, Tamil Nadu
             to Tripura, biryani is the most searched dish. The regional food map isn't a patchwork
-            of local champions — it's a biryani empire with fascinating runners-up.
+            of local champions. It's a biryani empire with fascinating runners-up.
           </p>
         </div>
 
@@ -250,7 +250,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>Total dominance</h3>
-                  <p>Biryani claims the top spot in every state tracked — not just a belt, but a blanket. From Punjab (where butter chicken is the cultural icon) to Tamil Nadu (the homeland of dosa), people still search for biryani more than their own local specialties.</p>
+                  <p>Biryani claims the top spot in every state tracked. Not just a belt, but a blanket. From Punjab (where butter chicken is the cultural icon) to Tamil Nadu (the homeland of dosa), people still search for biryani more than their own local specialties.</p>
                 </div>
               ),
             },
@@ -258,7 +258,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>The runners-up tell the real story</h3>
-                  <p>Look at what's #2 and #3 in each state — that's where regional identity lives. Dosa as runner-up across the South. Chole Bhature in Delhi. Khichdi in Gujarat. Roti strong across the Hindi belt. Momos in Sikkim. The real diversity hides behind biryani's shadow.</p>
+                  <p>Look at what's #2 and #3 in each state. That's where regional identity lives. Dosa as runner-up across the South. Chole Bhature in Delhi. Khichdi in Gujarat. Roti strong across the Hindi belt. Momos in Sikkim. The real diversity hides behind biryani's shadow.</p>
                 </div>
               ),
             },
@@ -266,7 +266,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>Why biryani wins search</h3>
-                  <p>Biryani dominates search because it's complex to make at home — people need recipes. Nobody Googles how to make roti or dal. Search doesn't measure what people eat; it measures what they aspire to cook. Biryani is India's most aspirational dish.</p>
+                  <p>Biryani dominates search because it's complex to make at home. People need recipes. Nobody Googles how to make roti or dal. Search doesn't measure what people eat; it measures what they aspire to cook. Biryani is India's most aspirational dish.</p>
                 </div>
               ),
             },
@@ -301,7 +301,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>The weekly rhythm</h3>
-                  <p>Each ring represents a different dish's search pattern across the seven days of the week. The distance from center shows relative search volume. Notice how the patterns differ — some dishes peak midweek, others on weekends.</p>
+                  <p>Each ring represents a different dish's search pattern across the seven days of the week. The distance from center shows relative search volume. Notice how the patterns differ: some dishes peak midweek, others on weekends.</p>
                 </div>
               ),
             },
@@ -317,7 +317,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>Weekday staples</h3>
-                  <p>Dal Rice peaks midweek on Wednesday — the point of maximum weekday fatigue. Samosa and Butter Chicken also peak on Thursdays, suggesting people plan their weekend indulgences a day early. The data reveals a nation that eats by the clock.</p>
+                  <p>Dal Rice peaks midweek on Wednesday, the point of maximum weekday fatigue. Samosa and Butter Chicken also peak on Thursdays, suggesting people plan their weekend indulgences a day early. The data reveals a nation that eats by the clock.</p>
                 </div>
               ),
             },
@@ -344,7 +344,7 @@ export function SearchingForFoodGuide() {
         <div className="content-col" style={{ marginBottom: '2rem' }}>
           <p>
             India's festival calendar is written in search data. Nearly every major celebration
-            has a signature dish, and the search spikes are dramatic — some dishes go from
+            has a signature dish, and the search spikes are dramatic. Some dishes go from
             near-zero to peak popularity within a single week.
           </p>
         </div>
@@ -364,7 +364,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>Modak and Ganesh Chaturthi</h3>
-                  <p>Modak — Lord Ganesha's favorite sweet — goes from near-invisible to peak search in August/September. The spike is one of the sharpest in all food search data, concentrated almost entirely in Maharashtra.</p>
+                  <p>Modak, Lord Ganesha's favorite sweet, goes from near-invisible to peak search in August/September. The spike is one of the sharpest in all food search data, concentrated almost entirely in Maharashtra.</p>
                 </div>
               ),
             },
@@ -372,7 +372,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>Diwali's sweet tooth</h3>
-                  <p>Ladoo and Gulab Jamun searches build through September (Navratri) and peak in October/November (Diwali). The festival of lights is also the festival of sweets — and the search data proves it.</p>
+                  <p>Ladoo and Gulab Jamun searches build through September (Navratri) and peak in October/November (Diwali). The festival of lights is also the festival of sweets, and the search data proves it.</p>
                 </div>
               ),
             },
@@ -380,7 +380,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>Ramadan and biryani</h3>
-                  <p>Haleem — a slow-cooked stew — spikes dramatically during Ramadan, particularly in Hyderabad. Biryani also sees a notable lift during the holy month, as iftar feasts drive search interest across the country.</p>
+                  <p>Haleem, a slow-cooked stew, spikes dramatically during Ramadan, particularly in Hyderabad. Biryani also sees a notable lift during the holy month, as iftar feasts drive search interest across the country.</p>
                 </div>
               ),
             },
@@ -406,9 +406,9 @@ export function SearchingForFoodGuide() {
 
         <div className="content-col" style={{ marginBottom: '2rem' }}>
           <p>
-            You&rsquo;ve seen biryani dominate every chart so far &mdash; #1 nationally, #1 in every state.
-            But here&rsquo;s the twist: search popularity and actual consumption are very different things.
-            Biryani tops Swiggy with 93 million orders a year, yet that&rsquo;s still less than 0.02% of India&rsquo;s
+            You've seen biryani dominate every chart so far: #1 nationally, #1 in every state.
+            But here's the twist. Search popularity and actual consumption are very different things.
+            Biryani tops Swiggy with 93 million orders a year, yet that's still less than 0.02% of India's
             daily meals. The foods Indians actually eat every day barely register on Google.
           </p>
         </div>
@@ -420,7 +420,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>What we search for</h3>
-                  <p>The left bars show Google search ranking &mdash; the same data that crowned biryani king in every previous chapter. Biryani leads because it&rsquo;s complex to cook: 20+ ingredients, layered rice, slow-cooked meat. People <em>need</em> Google for it. Nobody Googles how to boil dal.</p>
+                  <p>The left bars show Google search ranking, the same data that crowned biryani king in every previous chapter. Biryani leads because it's complex to cook: 20+ ingredients, layered rice, slow-cooked meat. People <em>need</em> Google for it. Nobody Googles how to boil dal.</p>
                 </div>
               ),
             },
@@ -428,7 +428,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>What we actually eat</h3>
-                  <p>Now look right. Roti and Masala Chai top daily consumption &mdash; 3 billion rotis and 800 million cups of chai, every single day. Dal Rice is #2. Biryani? It drops to #12 &mdash; a weekend project for most families, not a Tuesday dinner. The invisible backbone of Indian cuisine has never trended on Google.</p>
+                  <p>Now look right. Roti and Masala Chai top daily consumption: 3 billion rotis and 800 million cups of chai, every single day. Dal Rice is #2. Biryani? It drops to #12, a weekend project for most families, not a Tuesday dinner. The invisible backbone of Indian cuisine has never trended on Google.</p>
                 </div>
               ),
             },
@@ -436,7 +436,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>The gap</h3>
-                  <p>The highlighted rows reveal the biggest disconnects. Momos are #5 in search but #20 in consumption &mdash; pure curiosity. Masala Chai is the opposite: consumed more than any food in India but ranked #28 in search. Search measures what we aspire to cook; consumption measures what we actually live on.</p>
+                  <p>The highlighted rows reveal the biggest disconnects. Momos are #5 in search but #20 in consumption, pure curiosity. Masala Chai is the opposite: consumed more than any food in India but ranked #28 in search. Search measures what we aspire to cook; consumption measures what we actually live on.</p>
                 </div>
               ),
             },
@@ -463,7 +463,7 @@ export function SearchingForFoodGuide() {
         <div className="content-col" style={{ marginBottom: '2rem' }}>
           <p>
             The pandemic changed how India searched for food. Locked indoors, people turned to
-            their kitchens — and their search bars — with a new intensity. Some dishes surged
+            their kitchens, and their search bars, with a new intensity. Some dishes surged
             as comfort food; others fell as street food became inaccessible.
           </p>
         </div>
@@ -475,7 +475,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>Before the pandemic</h3>
-                  <p>The dashed lines show 2019 search patterns — the "normal" baseline. Each small chart tracks a different dish through the twelve months of the year.</p>
+                  <p>The dashed lines show 2019 search patterns, the "normal" baseline. Each small chart tracks a different dish through the twelve months of the year.</p>
                 </div>
               ),
             },
@@ -483,7 +483,7 @@ export function SearchingForFoodGuide() {
               content: (
                 <div>
                   <h3>The pandemic shift</h3>
-                  <p>The solid lines show 2021. Masala Chai (+44%) and Dal Rice (+36%) saw the biggest surges — the comforts of home when home was all you had. Khichdi (-27%) and Samosa (-16%) actually fell. The pandemic didn't uniformly boost home cooking — it reshaped what people craved most.</p>
+                  <p>The solid lines show 2021. Masala Chai (+44%) and Dal Rice (+36%) saw the biggest surges, the comforts of home when home was all you had. Khichdi (-27%) and Samosa (-16%) actually fell. The pandemic didn't uniformly boost home cooking. It reshaped what people craved most.</p>
                 </div>
               ),
             },
@@ -506,7 +506,7 @@ export function SearchingForFoodGuide() {
       {/* Conclusion */}
       <div className="content-col" style={{ padding: '4rem 1.5rem' }}>
         <p>
-          Food search data is a mirror — not of what India eats, but of what India <em>aspires</em> to eat,
+          Food search data is a mirror. Not of what India eats, but of what India <em>aspires</em> to eat,
           what it celebrates, what it misses when it's away from home. Behind every search query is a
           person standing in their kitchen, wondering how to make the biryani their grandmother made,
           or trying dosa for the first time, or looking up the perfect ladoo recipe before Diwali.
@@ -526,7 +526,7 @@ export function SearchingForFoodGuide() {
         <div className="food-share-buttons">
           <a
             className="food-share-btn"
-            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('Searching for Food — an interactive story about what India searches for when it\'s hungry')}&url=${encodeURIComponent('https://howindiaeats.soumyosinha.com')}`}
+            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('Searching for Food: an interactive story about what India searches for when it\'s hungry')}&url=${encodeURIComponent('https://howindiaeats.soumyosinha.com')}`}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Share on Twitter"
@@ -565,7 +565,7 @@ export function SearchingForFoodGuide() {
             triangulated from NSSO/HCES household expenditure surveys (2022-23) for cereal and
             pulse consumption, Tea Board of India consumption survey for chai penetration,
             Swiggy and Zomato annual reports (2024-25) for dish-level delivery data, and ICMR-NIN
-            dietary guidelines. No single source ranks all prepared dishes — consumption rankings
+            dietary guidelines. No single source ranks all prepared dishes; consumption rankings
             represent editorial estimates informed by these sources. High-confidence rankings
             (roti, chai, dal-rice) are directly supported; mid-table rankings involve greater
             uncertainty. Pandemic comparison uses 2019 vs 2021 data within a single 2018–2022

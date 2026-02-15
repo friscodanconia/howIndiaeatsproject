@@ -9,8 +9,8 @@ interface Message {
 const SUGGESTED_PROMPTS = [
   'I want something spicy and slow-cooked for a Sunday feast',
   "What's the perfect comfort food for a rainy evening?",
-  "Tell me about Modak — why is it Ganesha's favorite?",
-  'I saw a crispy crepe with chutney at a restaurant — what is it?',
+  "Tell me about Modak. Why is it Ganesha's favorite?",
+  'I saw a crispy crepe with chutney at a restaurant. What is it?',
 ];
 
 const MAX_MESSAGES = 5;
