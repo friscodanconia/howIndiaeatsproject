@@ -87,13 +87,13 @@ export function SearchingForFoodGuide() {
 
         {/* Watercolor food illustrations framing the title — 7 dishes in a ring */}
         {[
-          { dish: 'biryani', size: 300, top: '-5%', left: '2%', delay: 0, rotate: -8 },
-          { dish: 'jalebi', size: 240, top: '-6%', left: '50%', delay: 0.15, rotate: 5, marginLeft: -120 },
-          { dish: 'dosa', size: 290, top: '-4%', right: '2%', delay: 0.3, rotate: 8 },
-          { dish: 'chai', size: 250, top: '33%', left: '-3%', delay: 0.45, rotate: -5 },
-          { dish: 'momos', size: 250, top: '33%', right: '-3%', delay: 0.6, rotate: 8 },
-          { dish: 'tandoori', size: 280, bottom: '-4%', left: '3%', delay: 0.75, rotate: 10 },
-          { dish: 'samosa', size: 260, bottom: '-4%', right: '3%', delay: 0.9, rotate: -6 },
+          { dish: 'biryani', size: 380, top: '-8%', left: '-1%', delay: 0, rotate: -8 },
+          { dish: 'jalebi', size: 300, top: '-10%', left: '50%', delay: 0.15, rotate: 5, marginLeft: -150 },
+          { dish: 'dosa', size: 370, top: '-7%', right: '-1%', delay: 0.3, rotate: 8 },
+          { dish: 'chai', size: 320, top: '30%', left: '-5%', delay: 0.45, rotate: -5 },
+          { dish: 'momos', size: 320, top: '30%', right: '-5%', delay: 0.6, rotate: 8 },
+          { dish: 'tandoori', size: 360, bottom: '-7%', left: '0%', delay: 0.75, rotate: 10 },
+          { dish: 'samosa', size: 330, bottom: '-7%', right: '0%', delay: 0.9, rotate: -6 },
         ].map(({ dish, size, delay, rotate, marginLeft, ...pos }) => (
           <div
             key={dish}

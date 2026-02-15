@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import { useResponsiveSvg } from '../hooks/useResponsiveSvg';
 import { pandemicShifts, dishMap } from '../../../data/searchingForFood';
@@ -26,6 +26,18 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, dishId: '', color: '', preAvg: 0, postAvg: 0, changePercent: 0 });
 
+  const dismissTooltip = useCallback(() => {
+    setTooltip(prev => ({ ...prev, visible: false }));
+  }, []);
+
+  // Dismiss tooltip on scroll (for mobile split-screen)
+  useEffect(() => {
+    if (!tooltip.visible) return;
+    const onScroll = () => dismissTooltip();
+    window.addEventListener('scroll', onScroll, { passive: true, once: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [tooltip.visible, dismissTooltip]);
+
   useEffect(() => {
     if (!svgRef.current) return;
     const { width, height } = dimensions;
@@ -40,6 +52,30 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
     const cellPad = { top: 28, right: isMobile ? 4 : 8, bottom: 22, left: isMobile ? 20 : 25 };
     const cellW = (width - margin.left - margin.right) / cols;
     const cellH = (height - margin.top - margin.bottom) / rows;
+
+    // Shared tooltip logic
+    const showCellTooltip = (clientX: number, clientY: number, ps: typeof pandemicShifts[0], color: string, preAvg: number, postAvg: number) => {
+      setTooltip({
+        visible: true,
+        x: clientX,
+        y: clientY - 10,
+        dishId: ps.dishId,
+        color,
+        preAvg,
+        postAvg,
+        changePercent: ps.changePercent,
+      });
+    };
+
+    const hideTooltip = () => {
+      svg.selectAll('g.small-multiple-cell')
+        .transition().duration(150)
+        .attr('opacity', 1);
+      svg.selectAll('.cell-bg')
+        .transition().duration(150)
+        .attr('fill', 'transparent');
+      setTooltip(prev => ({ ...prev, visible: false }));
+    };
 
     pandemicShifts.forEach((ps, idx) => {
       const dish = dishMap.get(ps.dishId);
@@ -125,10 +161,9 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
         .y(d => y(d))
         .curve(d3.curveMonotoneX);
 
-      // Darken color for better visibility
       const darkerColor = d3.color(color)?.darker(0.4)?.toString() || color;
 
-      // 2019 area (always shown)
+      // 2019 area
       g.append('path')
         .datum(ps.pre)
         .attr('d', areaGen)
@@ -194,13 +229,13 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
           .attr('opacity', 1);
       }
 
-      // Hover interactions
+      // Precomputed averages
       const preAvg = Math.round(ps.pre.reduce((a, b) => a + b, 0) / 12);
       const postAvg = Math.round(ps.post.reduce((a, b) => a + b, 0) / 12);
 
+      // Desktop hover interactions
       g
         .on('mouseenter', (event) => {
-          // Highlight this cell
           g.select('.cell-bg')
             .transition().duration(150)
             .attr('fill', color + '0a');
@@ -208,7 +243,6 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
             .style('transform', `translate(${gx}px, ${gy}px) scale(1.03)`)
             .style('transform-origin', `${gx + cellW / 2}px ${gy + cellH / 2}px`);
 
-          // Dim other cells
           svg.selectAll('g.small-multiple-cell').each(function () {
             const el = d3.select(this);
             if (el.attr('data-idx') !== String(idx)) {
@@ -216,16 +250,7 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
             }
           });
 
-          setTooltip({
-            visible: true,
-            x: event.clientX,
-            y: event.clientY - 10,
-            dishId: ps.dishId,
-            color,
-            preAvg,
-            postAvg,
-            changePercent: ps.changePercent,
-          });
+          showCellTooltip(event.clientX, event.clientY, ps, color, preAvg, postAvg);
         })
         .on('mousemove', (event) => {
           setTooltip(prev => ({ ...prev, x: event.clientX, y: event.clientY - 10 }));
@@ -235,16 +260,54 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
             .transition().duration(150)
             .attr('fill', 'transparent');
           g.attr('style', null);
-
-          svg.selectAll('g.small-multiple-cell')
-            .transition().duration(150)
-            .attr('opacity', 1);
-
-          setTooltip(prev => ({ ...prev, visible: false }));
+          hideTooltip();
         });
+
+      // Mobile touch events
+      g.node()?.addEventListener('touchstart', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const touch = event.touches[0];
+
+        g.select('.cell-bg')
+          .transition().duration(150)
+          .attr('fill', color + '0a');
+
+        svg.selectAll('g.small-multiple-cell').each(function () {
+          const el = d3.select(this);
+          if (el.attr('data-idx') !== String(idx)) {
+            el.transition().duration(150).attr('opacity', 0.4);
+          }
+        });
+
+        showCellTooltip(touch.clientX, touch.clientY, ps, color, preAvg, postAvg);
+
+        const dismissOnTouch = (e: TouchEvent) => {
+          const target = e.target as Element;
+          if (!svgRef.current?.contains(target)) {
+            g.select('.cell-bg')
+              .transition().duration(150)
+              .attr('fill', 'transparent');
+            hideTooltip();
+            document.removeEventListener('touchstart', dismissOnTouch);
+          }
+        };
+        setTimeout(() => {
+          document.addEventListener('touchstart', dismissOnTouch, { passive: true });
+          window.addEventListener('scroll', () => {
+            g.select('.cell-bg')
+              .transition().duration(150)
+              .attr('fill', 'transparent');
+            hideTooltip();
+            document.removeEventListener('touchstart', dismissOnTouch);
+          }, { once: true, passive: true });
+        }, 50);
+      }, { passive: false });
     });
 
   }, [activeStep, dimensions]);
+
+  const changeSign = tooltip.changePercent > 0 ? '+' : '';
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -259,7 +322,7 @@ export function SmallMultiples({ activeStep }: SmallMultiplesProps) {
         x={tooltip.x}
         y={tooltip.y}
         visible={tooltip.visible}
-        extraLabel={tooltip.visible ? `2019: ${tooltip.preAvg} → 2021: ${tooltip.postAvg} (${tooltip.changePercent > 0 ? '+' : ''}${tooltip.changePercent}%)` : undefined}
+        extraLabel={tooltip.visible ? `2019 avg: ${tooltip.preAvg}\n2021 avg: ${tooltip.postAvg}\nChange: ${changeSign}${tooltip.changePercent}%` : undefined}
         sparklineType="seasonal"
       />
     </div>

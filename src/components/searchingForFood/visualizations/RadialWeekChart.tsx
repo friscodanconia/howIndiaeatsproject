@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
 import { useResponsiveSvg } from '../hooks/useResponsiveSvg';
 import { weeklyPatterns, dishMap } from '../../../data/searchingForFood';
@@ -23,6 +23,19 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
   const { containerRef, dimensions } = useResponsiveSvg();
   const svgRef = useRef<SVGSVGElement>(null);
   const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, dishId: '', day: '', value: 0 });
+  const [soloHighlight, setSoloHighlight] = useState<string | null>(null);
+
+  const dismissTooltip = useCallback(() => {
+    setTooltip(prev => ({ ...prev, visible: false }));
+  }, []);
+
+  // Dismiss tooltip on scroll (for mobile split-screen)
+  useEffect(() => {
+    if (!tooltip.visible) return;
+    const onScroll = () => dismissTooltip();
+    window.addEventListener('scroll', onScroll, { passive: true, once: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [tooltip.visible, dismissTooltip]);
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -95,10 +108,15 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
       const dish = dishMap.get(wp.dishId);
       const color = dish?.color || '#ccc';
 
-      const isHighlighted =
-        (activeStep === 1 && wp.dishId === 'biryani') ||
-        (activeStep === 2 && wp.dishId === 'dal-rice') ||
-        activeStep === 0;
+      let isHighlighted: boolean;
+      if (soloHighlight) {
+        isHighlighted = wp.dishId === soloHighlight;
+      } else {
+        isHighlighted =
+          (activeStep === 1 && wp.dishId === 'biryani') ||
+          (activeStep === 2 && wp.dishId === 'dal-rice') ||
+          activeStep === 0;
+      }
 
       const opacity = isHighlighted ? 0.85 : 0.12;
       const strokeWidth = isHighlighted ? 2.5 : 1.5;
@@ -153,12 +171,63 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
       }
     });
 
-    // Invisible overlay circles at each data point for hover
+    // Helper: restore opacities based on current state
+    const restoreOpacities = () => {
+      g.selectAll('path').each(function () {
+        const el = d3.select(this);
+        const elDish = el.attr('data-dish');
+        if (!elDish) return;
+        let isH: boolean;
+        if (soloHighlight) {
+          isH = elDish === soloHighlight;
+        } else {
+          isH =
+            (activeStep === 1 && elDish === 'biryani') ||
+            (activeStep === 2 && elDish === 'dal-rice') ||
+            activeStep === 0;
+        }
+        const fill = el.attr('fill');
+        const baseOpacity = fill !== 'none'
+          ? (isH ? 0.85 : 0.12) * 0.2
+          : (isH ? 0.85 : 0.12);
+        el.transition().duration(200).attr('opacity', baseOpacity);
+      });
+    };
+
+    // Shared tooltip show logic
+    const showTooltipForPoint = (clientX: number, clientY: number, dishId: string, dayIdx: number, val: number) => {
+      // Highlight this dish, dim others
+      g.selectAll('path').attr('opacity', function () {
+        const el = d3.select(this);
+        return el.attr('data-dish') === dishId ? 0.9 : 0.05;
+      });
+
+      setTooltip({
+        visible: true,
+        x: clientX,
+        y: clientY - 10,
+        dishId,
+        day: DAYS[dayIdx],
+        value: val,
+      });
+    };
+
+    const hideTooltip = () => {
+      restoreOpacities();
+      setTooltip(prev => ({ ...prev, visible: false }));
+    };
+
+    // Invisible overlay circles at each data point for hover + touch
     weeklyPatterns.forEach(wp => {
-      const isHighlighted =
-        (activeStep === 1 && wp.dishId === 'biryani') ||
-        (activeStep === 2 && wp.dishId === 'dal-rice') ||
-        activeStep === 0;
+      let isHighlighted: boolean;
+      if (soloHighlight) {
+        isHighlighted = wp.dishId === soloHighlight;
+      } else {
+        isHighlighted =
+          (activeStep === 1 && wp.dishId === 'biryani') ||
+          (activeStep === 2 && wp.dishId === 'dal-rice') ||
+          activeStep === 0;
+      }
 
       if (!isHighlighted) return;
 
@@ -166,52 +235,47 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
         const angle = angleScale(dayIdx) - Math.PI / 2;
         const r = radiusScale(val);
 
-        g.append('circle')
+        const circle = g.append('circle')
           .attr('cx', r * Math.cos(angle))
           .attr('cy', r * Math.sin(angle))
           .attr('r', 8)
           .attr('fill', 'transparent')
           .attr('cursor', 'pointer')
-          .on('mouseenter', (event) => {
-            // Highlight this dish, dim others
-            g.selectAll('path').attr('opacity', function () {
-              const el = d3.select(this);
-              return el.attr('data-dish') === wp.dishId ? 0.9 : 0.05;
-            });
+          .attr('data-touchable', 'true');
 
-            const rect = containerRef.current?.getBoundingClientRect();
-            if (!rect) return;
-            setTooltip({
-              visible: true,
-              x: event.clientX,
-              y: event.clientY - 10,
-              dishId: wp.dishId,
-              day: DAYS[dayIdx],
-              value: val,
-            });
+        // Desktop mouse events
+        circle
+          .on('mouseenter', (event) => {
+            showTooltipForPoint(event.clientX, event.clientY, wp.dishId, dayIdx, val);
           })
-          .on('mouseleave', () => {
-            // Restore opacities
-            g.selectAll('path').each(function () {
-              const el = d3.select(this);
-              const elDish = el.attr('data-dish');
-              if (!elDish) return;
-              const isH =
-                (activeStep === 1 && elDish === 'biryani') ||
-                (activeStep === 2 && elDish === 'dal-rice') ||
-                activeStep === 0;
-              const fill = el.attr('fill');
-              const baseOpacity = fill !== 'none'
-                ? (isH ? 0.85 : 0.12) * 0.2
-                : (isH ? 0.85 : 0.12);
-              el.transition().duration(200).attr('opacity', baseOpacity);
-            });
-            setTooltip(prev => ({ ...prev, visible: false }));
-          });
+          .on('mouseleave', hideTooltip);
+
+        // Mobile touch events
+        circle.node()?.addEventListener('touchstart', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const touch = event.touches[0];
+          showTooltipForPoint(touch.clientX, touch.clientY, wp.dishId, dayIdx, val);
+
+          const dismissOnTouch = (e: TouchEvent) => {
+            const target = e.target as Element;
+            if (!(target as Element).closest('[data-touchable]')) {
+              hideTooltip();
+              document.removeEventListener('touchstart', dismissOnTouch);
+            }
+          };
+          setTimeout(() => {
+            document.addEventListener('touchstart', dismissOnTouch, { passive: true });
+            window.addEventListener('scroll', () => {
+              hideTooltip();
+              document.removeEventListener('touchstart', dismissOnTouch);
+            }, { once: true, passive: true });
+          }, 50);
+        }, { passive: false });
       });
     });
 
-  }, [activeStep, dimensions]);
+  }, [activeStep, dimensions, soloHighlight]);
 
   const legendDishes = useMemo(() => {
     return weeklyPatterns.map(wp => {
@@ -221,36 +285,32 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
   }, []);
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div ref={containerRef} className="viz-chart-container" style={{ width: '100%', height: '100%', position: 'relative' }}>
       <svg
         ref={svgRef}
         width={dimensions.width}
         height={dimensions.height}
+        className="viz-chart-svg"
         style={{ overflow: 'visible' }}
       />
 
-      {/* Color legend */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: '0.5rem 1rem',
-        padding: '0.5rem 0',
-        fontFamily: '"Jost", sans-serif',
-        fontSize: '0.75rem',
-      }}>
-        {legendDishes.map(d => (
-          <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <span style={{
-              width: 10,
-              height: 10,
-              borderRadius: 2,
-              background: d.color,
-              flexShrink: 0,
-            }} />
-            <span style={{ color: '#68594f' }}>{d.name}</span>
-          </div>
-        ))}
+      {/* Clickable legend */}
+      <div className="chart-legend viz-chart-controls">
+        {legendDishes.map(d => {
+          const isActive = soloHighlight === d.id;
+          const isDimmed = soloHighlight !== null && soloHighlight !== d.id;
+          return (
+            <div
+              key={d.id}
+              className={`chart-legend-item${isActive ? ' active' : ''}${isDimmed ? ' dimmed' : ''}`}
+              style={isActive ? { borderColor: d.color, background: d.color + '15' } : undefined}
+              onClick={() => setSoloHighlight(prev => prev === d.id ? null : d.id)}
+            >
+              <span className="legend-swatch" style={{ background: d.color }} />
+              <span className="legend-label">{d.name}</span>
+            </div>
+          );
+        })}
       </div>
 
       <RichTooltip
@@ -258,7 +318,7 @@ export function RadialWeekChart({ activeStep }: RadialWeekChartProps) {
         x={tooltip.x}
         y={tooltip.y}
         visible={tooltip.visible}
-        extraLabel={tooltip.visible ? `${tooltip.day}: ${tooltip.value}` : undefined}
+        extraLabel={tooltip.visible ? `${tooltip.day}\nSearch index: ${tooltip.value}` : undefined}
         sparklineType="weekly"
       />
     </div>

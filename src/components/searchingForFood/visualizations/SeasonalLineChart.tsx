@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
 import { useResponsiveSvg } from '../hooks/useResponsiveSvg';
 import { seasonalTrends, dishMap } from '../../../data/searchingForFood';
@@ -23,6 +23,19 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
   const { containerRef, dimensions } = useResponsiveSvg();
   const svgRef = useRef<SVGSVGElement>(null);
   const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, month: '', dishId: '', items: [] });
+  const [soloHighlight, setSoloHighlight] = useState<string | null>(null);
+
+  const dismissTooltip = useCallback(() => {
+    setTooltip(prev => ({ ...prev, visible: false }));
+  }, []);
+
+  // Dismiss tooltip on scroll (for mobile split-screen)
+  useEffect(() => {
+    if (!tooltip.visible) return;
+    const onScroll = () => dismissTooltip();
+    window.addEventListener('scroll', onScroll, { passive: true, once: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [tooltip.visible, dismissTooltip]);
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -76,9 +89,17 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
     seasonalTrends.forEach((st, idx) => {
       const dish = dishMap.get(st.dishId);
       const color = dish?.color || '#ccc';
-      const isHighlighted = highlighted.length === 0 || highlighted.includes(st.dishId);
+
+      // Solo highlight overrides step-based highlighting
+      let isHighlighted: boolean;
+      if (soloHighlight) {
+        isHighlighted = st.dishId === soloHighlight;
+      } else {
+        isHighlighted = highlighted.length === 0 || highlighted.includes(st.dishId);
+      }
+
       const opacity = isHighlighted ? 0.9 : 0.1;
-      const strokeWidth = isHighlighted && highlighted.length > 0 ? 3 : 1.5;
+      const strokeWidth = isHighlighted && (highlighted.length > 0 || soloHighlight) ? 3 : 1.5;
 
       // Area
       const areaGen = d3.area<number>()
@@ -87,7 +108,7 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
         .y1(d => y(d))
         .curve(d3.curveMonotoneX);
 
-      if (isHighlighted && highlighted.length > 0) {
+      if (isHighlighted && (highlighted.length > 0 || soloHighlight)) {
         g.append('path')
           .datum(st.monthly)
           .attr('d', areaGen)
@@ -111,7 +132,7 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
         .attr('opacity', opacity);
 
       // Label on highlighted lines
-      if (isHighlighted && highlighted.length > 0 && dish) {
+      if (isHighlighted && (highlighted.length > 0 || soloHighlight) && dish) {
         const maxVal = Math.max(...st.monthly);
         const maxIdx = st.monthly.indexOf(maxVal);
 
@@ -171,74 +192,142 @@ export function SeasonalLineChart({ activeStep }: SeasonalLineChartProps) {
     // Hover dots
     const hoverDots = g.append('g').attr('class', 'hover-dots');
 
-    // Invisible overlay for mouse tracking
-    g.append('rect')
+    // Shared hover/touch logic
+    const showTooltipAtMonth = (clientX: number, clientY: number, mx: number) => {
+      const monthIdx = Math.round(x.invert(mx));
+      const clampedIdx = Math.max(0, Math.min(11, monthIdx));
+      const xPos = x(clampedIdx);
+
+      crosshair.attr('x1', xPos).attr('x2', xPos).attr('opacity', 0.6);
+
+      const items: { name: string; color: string; value: number; dishId: string }[] = [];
+      hoverDots.selectAll('*').remove();
+
+      seasonalTrends.forEach(st => {
+        const dish = dishMap.get(st.dishId);
+        let isVis: boolean;
+        if (soloHighlight) {
+          isVis = st.dishId === soloHighlight;
+        } else {
+          isVis = highlighted.length === 0 || highlighted.includes(st.dishId);
+        }
+        if (!isVis || !dish) return;
+
+        const val = st.monthly[clampedIdx];
+        items.push({ name: dish.name, color: dish.color, value: val, dishId: st.dishId });
+
+        hoverDots.append('circle')
+          .attr('cx', xPos)
+          .attr('cy', y(val))
+          .attr('r', 4)
+          .attr('fill', dish.color)
+          .attr('stroke', 'white')
+          .attr('stroke-width', 1.5);
+      });
+
+      const sortedItems = items.sort((a, b) => b.value - a.value);
+      setTooltip({
+        visible: true,
+        x: clientX,
+        y: clientY - 10,
+        month: MONTHS[clampedIdx],
+        dishId: sortedItems[0]?.dishId || '',
+        items: sortedItems,
+      });
+    };
+
+    const hideTooltip = () => {
+      crosshair.attr('opacity', 0);
+      hoverDots.selectAll('*').remove();
+      setTooltip(prev => ({ ...prev, visible: false }));
+    };
+
+    // Invisible overlay for mouse/touch tracking
+    const overlay = g.append('rect')
       .attr('width', w)
       .attr('height', h)
       .attr('fill', 'transparent')
-      .attr('cursor', 'crosshair')
+      .attr('cursor', 'crosshair');
+
+    // Desktop mouse events
+    overlay
       .on('mousemove', (event) => {
         const [mx] = d3.pointer(event);
-        const monthIdx = Math.round(x.invert(mx));
-        const clampedIdx = Math.max(0, Math.min(11, monthIdx));
-        const xPos = x(clampedIdx);
-
-        // Show crosshair
-        crosshair.attr('x1', xPos).attr('x2', xPos).attr('opacity', 0.6);
-
-        // Get values for visible dishes at this month
-        const items: { name: string; color: string; value: number; dishId: string }[] = [];
-        hoverDots.selectAll('*').remove();
-
-        seasonalTrends.forEach(st => {
-          const dish = dishMap.get(st.dishId);
-          const isHighlighted = highlighted.length === 0 || highlighted.includes(st.dishId);
-          if (!isHighlighted || !dish) return;
-
-          const val = st.monthly[clampedIdx];
-          items.push({ name: dish.name, color: dish.color, value: val, dishId: st.dishId });
-
-          hoverDots.append('circle')
-            .attr('cx', xPos)
-            .attr('cy', y(val))
-            .attr('r', 4)
-            .attr('fill', dish.color)
-            .attr('stroke', 'white')
-            .attr('stroke-width', 1.5);
-        });
-
-        const sortedItems = items.sort((a, b) => b.value - a.value);
-        setTooltip({
-          visible: true,
-          x: event.clientX,
-          y: event.clientY - 10,
-          month: MONTHS[clampedIdx],
-          dishId: sortedItems[0]?.dishId || '',
-          items: sortedItems,
-        });
+        showTooltipAtMonth(event.clientX, event.clientY, mx);
       })
-      .on('mouseleave', () => {
-        crosshair.attr('opacity', 0);
-        hoverDots.selectAll('*').remove();
-        setTooltip(prev => ({ ...prev, visible: false }));
-      });
+      .on('mouseleave', hideTooltip);
 
-  }, [activeStep, dimensions]);
+    // Mobile touch events
+    overlay.node()?.addEventListener('touchstart', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const touch = event.touches[0];
+      const svgRect = svgRef.current!.getBoundingClientRect();
+      const mx = touch.clientX - svgRect.left - margin.left;
+      showTooltipAtMonth(touch.clientX, touch.clientY, mx);
+
+      // Dismiss on touch-outside
+      const dismissOnTouch = (e: TouchEvent) => {
+        const target = e.target as Element;
+        if (!svgRef.current?.contains(target)) {
+          hideTooltip();
+          document.removeEventListener('touchstart', dismissOnTouch);
+        }
+      };
+      setTimeout(() => {
+        document.addEventListener('touchstart', dismissOnTouch, { once: false, passive: true });
+        // Also dismiss on scroll
+        window.addEventListener('scroll', () => {
+          hideTooltip();
+          document.removeEventListener('touchstart', dismissOnTouch);
+        }, { once: true, passive: true });
+      }, 50);
+    }, { passive: false });
+
+  }, [activeStep, dimensions, soloHighlight]);
+
+  const legendDishes = useMemo(() => {
+    return seasonalTrends.map(st => {
+      const dish = dishMap.get(st.dishId);
+      return dish ? { id: st.dishId, name: dish.name, color: dish.color } : null;
+    }).filter(Boolean) as { id: string; name: string; color: string }[];
+  }, []);
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div ref={containerRef} className="viz-chart-container" style={{ width: '100%', height: '100%', position: 'relative' }}>
       <svg
         ref={svgRef}
         width={dimensions.width}
         height={dimensions.height}
+        className="viz-chart-svg"
         style={{ overflow: 'visible' }}
       />
+
+      {/* Clickable legend */}
+      <div className="chart-legend viz-chart-controls">
+        {legendDishes.map(d => {
+          const isActive = soloHighlight === d.id;
+          const isDimmed = soloHighlight !== null && soloHighlight !== d.id;
+          return (
+            <div
+              key={d.id}
+              className={`chart-legend-item${isActive ? ' active' : ''}${isDimmed ? ' dimmed' : ''}`}
+              style={isActive ? { borderColor: d.color, background: d.color + '15' } : undefined}
+              onClick={() => setSoloHighlight(prev => prev === d.id ? null : d.id)}
+            >
+              <span className="legend-swatch" style={{ background: d.color }} />
+              <span className="legend-label">{d.name}</span>
+            </div>
+          );
+        })}
+      </div>
+
       <RichTooltip
         dishId={tooltip.dishId}
         x={tooltip.x}
         y={tooltip.y}
         visible={tooltip.visible}
-        extraLabel={tooltip.visible ? `${tooltip.month}: ${tooltip.items.map(i => `${i.name} ${i.value}`).join(', ')}` : undefined}
+        items={tooltip.visible ? tooltip.items.map(i => ({ name: i.name, color: i.color, value: i.value })) : undefined}
         sparklineType="seasonal"
       />
     </div>

@@ -271,17 +271,18 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
   }, [activeStep, showRank]);
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div ref={containerRef} className="viz-chart-container" style={{ width: '100%', height: '100%', position: 'relative' }}>
       <svg
         ref={svgRef}
         width={dimensions.width}
         height={dimensions.height}
+        className="viz-chart-svg"
         style={{ overflow: 'visible' }}
         onClick={handleClickOutside}
       />
 
       {/* Rank toggle button */}
-      <div className="geo-rank-toggle">
+      <div className="geo-rank-toggle viz-chart-controls">
         <button
           className={`geo-rank-btn ${showRank === 1 ? 'active' : ''}`}
           onClick={() => setShowRank(1)}
@@ -298,7 +299,7 @@ export function GeoStateMap({ activeStep }: GeoStateMapProps) {
 
       {/* Color legend */}
       {legendDishes.length > 0 && (
-        <div className="geo-legend" style={{
+        <div className="geo-legend viz-chart-controls" style={{
           display: 'flex',
           flexWrap: 'wrap',
           justifyContent: 'center',

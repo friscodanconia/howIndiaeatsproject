@@ -18,8 +18,10 @@ interface RichTooltipProps {
   x: number;
   y: number;
   visible: boolean;
-  /** Extra line of context (e.g. "Sunday: 100") */
+  /** Extra line of context (e.g. "Sunday: 100"). Supports \n for multi-line. */
   extraLabel?: string;
+  /** Structured multi-dish list (replaces extraLabel when provided) */
+  items?: { name: string; color: string; value: number }[];
   /** Which sparkline to show */
   sparklineType?: 'weekly' | 'seasonal';
 }
@@ -49,7 +51,7 @@ function MiniSparkline({ data, color, width = 60, height = 20 }: { data: number[
   );
 }
 
-export function RichTooltip({ dishId, x, y, visible, extraLabel, sparklineType = 'weekly' }: RichTooltipProps) {
+export function RichTooltip({ dishId, x, y, visible, extraLabel, items, sparklineType = 'weekly' }: RichTooltipProps) {
   const dish = dishMap.get(dishId);
   if (!visible || !dish) return null;
 
@@ -104,9 +106,23 @@ export function RichTooltip({ dishId, x, y, visible, extraLabel, sparklineType =
         </div>
       )}
 
-      {extraLabel && (
-        <div className="rich-tooltip-extra">{extraLabel}</div>
-      )}
+      {items && items.length > 0 ? (
+        <div className="rich-tooltip-items">
+          {items.sort((a, b) => b.value - a.value).map((item, i) => (
+            <div key={i} className="rich-tooltip-item-row">
+              <span className="rich-tooltip-item-dot" style={{ background: item.color }} />
+              <span className="rich-tooltip-item-name">{item.name}</span>
+              <span className="rich-tooltip-item-value">{item.value}</span>
+            </div>
+          ))}
+        </div>
+      ) : extraLabel ? (
+        <div className="rich-tooltip-extra">
+          {extraLabel.includes('\n')
+            ? extraLabel.split('\n').map((line, i) => <div key={i}>{line}</div>)
+            : extraLabel}
+        </div>
+      ) : null}
 
       {dish.funFact && (
         <div className="rich-tooltip-fact">{dish.funFact}</div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import { useResponsiveSvg } from '../hooks/useResponsiveSvg';
 import { consumptionGap, dishMap } from '../../../data/searchingForFood';
@@ -24,6 +24,18 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, dishId: '', searchRank: 0, consumptionRank: 0, gap: 0, note: '' });
 
+  const dismissTooltip = useCallback(() => {
+    setTooltip(prev => ({ ...prev, visible: false }));
+  }, []);
+
+  // Dismiss tooltip on scroll (for mobile split-screen)
+  useEffect(() => {
+    if (!tooltip.visible) return;
+    const onScroll = () => dismissTooltip();
+    window.addEventListener('scroll', onScroll, { passive: true, once: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [tooltip.visible, dismissTooltip]);
+
   useEffect(() => {
     if (!svgRef.current) return;
     const { width, height } = dimensions;
@@ -48,8 +60,6 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
       ...sorted.map(d => d.consumptionRank)
     );
 
-    // Bar length = intensity (rank #1 = longest bar, higher rank = shorter bar)
-    // barWidth maps a rank to its pixel width (inverted: lower rank number = wider)
     const halfWidth = midX - 20;
     const barWidth = (rank: number) => halfWidth * (maxRank + 1 - rank) / maxRank;
 
@@ -80,6 +90,27 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
       .attr('y2', h)
       .attr('stroke', '#e7decd')
       .attr('stroke-width', 1);
+
+    // Shared tooltip logic
+    const showRowTooltip = (clientX: number, clientY: number, item: typeof sorted[0]) => {
+      setTooltip({
+        visible: true,
+        x: clientX,
+        y: clientY - 10,
+        dishId: item.dishId,
+        searchRank: item.searchRank,
+        consumptionRank: item.consumptionRank,
+        gap: item.consumptionRank - item.searchRank,
+        note: item.note,
+      });
+    };
+
+    const hideTooltip = () => {
+      g.selectAll('g.bar-row')
+        .transition().duration(150)
+        .attr('opacity', 1);
+      setTooltip(prev => ({ ...prev, visible: false }));
+    };
 
     sorted.forEach((item, i) => {
       const dish = dishMap.get(item.dishId);
@@ -116,7 +147,7 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
         .attr('fill', '#28211e')
         .text(dish?.name || item.dishId);
 
-      // Search bar (left) — grows leftward from center
+      // Search bar (left)
       if (showSearch) {
         const sw = barWidth(item.searchRank);
         rowGroup.append('rect')
@@ -131,7 +162,6 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           .transition().duration(600).delay(i * 30).ease(d3.easeBackOut.overshoot(1.3))
           .attr('width', sw);
 
-        // Rank number
         const searchLabelX = Math.max(2, midX - 20 - sw - 5);
         rowGroup.append('text')
           .attr('x', searchLabelX)
@@ -146,7 +176,7 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           .attr('opacity', 1);
       }
 
-      // Consumption bar (right) — grows rightward from center
+      // Consumption bar (right)
       if (showConsumption) {
         const cw = barWidth(item.consumptionRank);
         rowGroup.append('rect')
@@ -190,40 +220,59 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
           .attr('opacity', 0.06);
       }
 
-      // Hover interactions
+      // Desktop hover interactions
       rowGroup
         .on('mouseenter', (event) => {
-          // Dim other rows
           g.selectAll('g.bar-row').each(function () {
             const el = d3.select(this);
             if (el.attr('data-idx') !== String(i)) {
               el.transition().duration(150).attr('opacity', 0.4);
             }
           });
-
-          setTooltip({
-            visible: true,
-            x: event.clientX,
-            y: event.clientY - 10,
-            dishId: item.dishId,
-            searchRank: item.searchRank,
-            consumptionRank: item.consumptionRank,
-            gap: item.consumptionRank - item.searchRank,
-            note: item.note,
-          });
+          showRowTooltip(event.clientX, event.clientY, item);
         })
         .on('mousemove', (event) => {
           setTooltip(prev => ({ ...prev, x: event.clientX, y: event.clientY - 10 }));
         })
-        .on('mouseleave', () => {
-          g.selectAll('g.bar-row')
-            .transition().duration(150)
-            .attr('opacity', 1);
-          setTooltip(prev => ({ ...prev, visible: false }));
+        .on('mouseleave', hideTooltip);
+
+      // Mobile touch events
+      rowGroup.node()?.addEventListener('touchstart', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const touch = event.touches[0];
+
+        // Dim other rows
+        g.selectAll('g.bar-row').each(function () {
+          const el = d3.select(this);
+          if (el.attr('data-idx') !== String(i)) {
+            el.transition().duration(150).attr('opacity', 0.4);
+          }
         });
+
+        showRowTooltip(touch.clientX, touch.clientY, item);
+
+        const dismissOnTouch = (e: TouchEvent) => {
+          const target = e.target as Element;
+          if (!svgRef.current?.contains(target)) {
+            hideTooltip();
+            document.removeEventListener('touchstart', dismissOnTouch);
+          }
+        };
+        setTimeout(() => {
+          document.addEventListener('touchstart', dismissOnTouch, { passive: true });
+          window.addEventListener('scroll', () => {
+            hideTooltip();
+            document.removeEventListener('touchstart', dismissOnTouch);
+          }, { once: true, passive: true });
+        }, 50);
+      }, { passive: false });
     });
 
   }, [activeStep, dimensions]);
+
+  const gap = tooltip.gap;
+  const gapLabel = gap !== 0 ? `Gap: ${gap > 0 ? '↓' : '↑'}${Math.abs(gap)} ranks` : 'Gap: none';
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -238,7 +287,7 @@ export function DivergingBarChart({ activeStep }: DivergingBarChartProps) {
         x={tooltip.x}
         y={tooltip.y}
         visible={tooltip.visible}
-        extraLabel={tooltip.visible ? `Search #${tooltip.searchRank} · Eaten #${tooltip.consumptionRank}${tooltip.gap !== 0 ? ` (${tooltip.gap > 0 ? '↓' : '↑'}${Math.abs(tooltip.gap)})` : ''}` : undefined}
+        extraLabel={tooltip.visible ? `Search: #${tooltip.searchRank}\nConsumption: #${tooltip.consumptionRank}\n${gapLabel}` : undefined}
       />
     </div>
   );
