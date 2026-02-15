@@ -138,6 +138,18 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
         .attr('flood-color', 'rgba(97, 61, 31, 0.12)');
     }
 
+    // Katori glow filter
+    let glowFilter = defs.select('#katori-glow-filter');
+    if (glowFilter.empty()) {
+      const gf = defs.append('filter')
+        .attr('id', 'katori-glow-filter')
+        .attr('x', '-50%').attr('y', '-50%')
+        .attr('width', '200%').attr('height', '200%');
+      gf.append('feGaussianBlur')
+        .attr('in', 'SourceGraphic')
+        .attr('stdDeviation', 4);
+    }
+
     // Create patterns for each katori
     nodes.forEach(node => {
       const patternId = `thali-img-${node.dishId}`;
@@ -174,7 +186,7 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
     plate
       .attr('cx', cx)
       .attr('cy', cy)
-      .transition().duration(800).ease(d3.easeBackOut.overshoot(1.3))
+      .transition().duration(800).ease(d3.easeBackOut.overshoot(1.0))
       .attr('r', plateRadius);
 
     // Plate rim decoration
@@ -190,7 +202,7 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
     }
     rimOuter
       .attr('cx', cx).attr('cy', cy)
-      .transition().duration(800).ease(d3.easeBackOut.overshoot(1.3))
+      .transition().duration(800).ease(d3.easeBackOut.overshoot(1.0))
       .attr('r', plateRadius * 0.92);
 
     let rimInner = svg.select<SVGCircleElement>('circle.thali-rim-inner');
@@ -204,7 +216,7 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
     }
     rimInner
       .attr('cx', cx).attr('cy', cy)
-      .transition().duration(800).ease(d3.easeBackOut.overshoot(1.3))
+      .transition().duration(800).ease(d3.easeBackOut.overshoot(1.0))
       .attr('r', plateRadius * 0.60);
 
     // Data join for katoris
@@ -240,6 +252,16 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
       .attr('cy', d => d.r * 0.7)
       .attr('fill', 'rgba(97, 61, 31, 0.08)');
 
+    // Hover glow ring (hidden by default)
+    enter.append('circle')
+      .attr('class', 'katori-glow')
+      .attr('r', d => d.r + 8)
+      .attr('fill', 'none')
+      .attr('stroke', d => d.color)
+      .attr('stroke-width', 6)
+      .attr('opacity', 0)
+      .attr('filter', 'url(#katori-glow-filter)');
+
     // Bowl background (katori rim)
     enter.append('circle')
       .attr('class', 'katori-rim')
@@ -270,22 +292,49 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
     // Merge
     const merged = enter.merge(katoriGroup);
 
-    // Animate to target positions with stagger
-    merged.each(function (d, i) {
-      const staggerDelay = isNewStep ? i * 60 : 0;
+    // Ring-aware stagger: plate first, then center, inner ring, outer ring
+    const getStaggerDelay = (index: number): number => {
+      if (index === 0) return 200;                    // center biryani: after plate
+      if (index < 5) return 400 + (index - 1) * 80;  // inner ring: 400-640ms
+      return 800 + (index - 5) * 40;                  // outer ring: 800-1360ms
+    };
 
-      d3.select(this)
-        .transition()
+    // Animate to target positions with ring-aware stagger
+    merged.each(function (d, i) {
+      const el = d3.select(this);
+      const isEntering = el.attr('opacity') === '0' || el.attr('opacity') === null;
+      const staggerDelay = isNewStep ? getStaggerDelay(i) : 0;
+      const ease = isEntering ? d3.easeBackOut.overshoot(1.0) : d3.easeCubicOut;
+
+      el.transition()
         .duration(800)
         .delay(staggerDelay)
-        .ease(d3.easeBackOut.overshoot(1.3))
+        .ease(ease)
         .attr('transform', `translate(${d.targetX},${d.targetY}) scale(1)`)
         .attr('opacity', 1);
     });
 
+    // Subtle center katori pulse after full thali lands (step 2+)
+    if (activeStep >= 2 && isNewStep) {
+      const centerKatori = merged.filter(d => d.rank === 1);
+      centerKatori.each(function (d) {
+        d3.select(this)
+          .transition('pulse')
+          .delay(1400)
+          .duration(300)
+          .attr('transform', `translate(${d.targetX},${d.targetY}) scale(1.05)`)
+          .transition('pulse')
+          .duration(300)
+          .attr('transform', `translate(${d.targetX},${d.targetY}) scale(1)`);
+      });
+    }
+
     // Update sizes for existing katoris
     merged.select('circle.katori-hit')
       .attr('r', d => Math.max(22, d.r));
+    merged.select('circle.katori-glow')
+      .attr('r', d => d.r + 8)
+      .attr('stroke', d => d.color);
     merged.select('circle.katori-rim')
       .attr('r', d => d.r + 3);
     merged.select('circle.katori-img')
@@ -300,9 +349,12 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
       .attr('dy', d => d.r + Math.max(14, d.r * 0.25))
       .style('font-size', d => `${Math.max(8, d.r * 0.2)}px`);
 
-    // Hover effects
+    // Hover effects (with glow)
     merged
       .on('mouseenter', function (_, d) {
+        d3.select(this).select('circle.katori-glow')
+          .transition().duration(200)
+          .attr('opacity', 0.6);
         d3.select(this).select('circle.katori-img')
           .transition().duration(200)
           .attr('stroke-width', 3);
@@ -312,6 +364,9 @@ export function ThaliChart({ activeStep }: ThaliChartProps) {
       })
       .on('mouseleave', function (_, d) {
         if (popup.dishId === d.dishId && popup.visible) return;
+        d3.select(this).select('circle.katori-glow')
+          .transition().duration(200)
+          .attr('opacity', 0);
         d3.select(this).select('circle.katori-img')
           .transition().duration(200)
           .attr('stroke-width', 2);
